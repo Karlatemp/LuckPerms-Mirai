@@ -1,0 +1,3 @@
+[submodule "LuckPerms"]
+	path = LuckPerms
+	url = https://github.com/lucko/LuckPerms.git
