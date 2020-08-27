@@ -1,3 +1,3 @@
 rootProject.name = 'LuckPerms-Mirai'
 
-includeBuild 'LuckPerms'
+includeBuild('LuckPerms')

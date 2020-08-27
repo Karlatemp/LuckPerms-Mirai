@@ -1,0 +1,3 @@
+name: LuckPerms
+main: io.github.karlatemp.luckperms.mirai.LPMiraiBootstrap
+version: ${pluginVersion}

@@ -1,16 +1,73 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.4.0'
+    id 'com.github.johnrengelman.shadow' version '6.0.0'
 }
 
 group 'io.github.karlatemp'
-version '1.0'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
+def lpVersion = ({
+    def resu
+    gradle.includedBuild("LuckPerms").properties.availableModules.each { module ->
+        ModuleVersionIdentifier m = module.left()
+        if (m.name == 'common') {
+            resu = m.version
+        }
+    }
+    return resu
+})()
+
+version lpVersion
+
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
+    compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.18'
+    compile 'org.spongepowered:configurate-hocon:3.7.1'
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+
+    compile "me.lucko.luckperms:common" // LuckPerms
+    compileOnly("net.mamoe:mirai-core:1.2.2")
+    compileOnly("net.mamoe:mirai-console:1.0-M3") // 后端
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand 'pluginVersion': lpVersion
+        include 'plugin.yml'
+    }
+}
+
+shadowJar {
+    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
+    relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
+    relocate 'okio', 'me.lucko.luckperms.lib.okio'
+    relocate 'okhttp3', 'me.lucko.luckperms.lib.okhttp3'
+    relocate 'net.bytebuddy', 'me.lucko.luckperms.lib.bytebuddy'
+    relocate 'me.lucko.commodore', 'me.lucko.luckperms.lib.commodore'
+    relocate 'org.mariadb.jdbc', 'me.lucko.luckperms.lib.mariadb'
+    relocate 'com.mysql', 'me.lucko.luckperms.lib.mysql'
+    relocate 'org.postgresql', 'me.lucko.luckperms.lib.postgresql'
+    relocate 'com.zaxxer.hikari', 'me.lucko.luckperms.lib.hikari'
+    relocate 'com.mongodb', 'me.lucko.luckperms.lib.mongodb'
+    relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
+    relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
+    relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
+    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
+                             '-Xjvm-default=enable']
+    }
 }
