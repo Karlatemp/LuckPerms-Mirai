@@ -22,7 +22,8 @@ def lpVersion = ({
     return resu
 })()
 
-version lpVersion
+// [LuckPerms version]+[LP-Mirai version]
+version lpVersion + '+' + '1.0.0'
 
 dependencies {
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
