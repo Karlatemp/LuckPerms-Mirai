@@ -23,7 +23,7 @@ def lpVersion = ({
 })()
 
 // [LuckPerms version]+[LP-Mirai version]
-version lpVersion + '+' + '1.0.0'
+version '1.0.0-' + lpVersion.replace('-', '+')
 
 dependencies {
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
