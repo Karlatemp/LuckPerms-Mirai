@@ -1,5 +1,6 @@
 package io.github.karlatemp.luckperms.mirai
 
+import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.util.ChatColor
 import io.github.karlatemp.luckperms.mirai.util.colorTranslator
 import kotlinx.coroutines.runBlocking
@@ -12,11 +13,13 @@ import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.executeCommand
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.ConsoleCommandSender
+import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
 import java.util.*
 
 class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, CommandSender>(
     LPMiraiPlugin
 ) {
+    @OptIn(ConsoleExperimentalAPI::class)
     override fun getName(sender: CommandSender?): String {
         if (sender is WrappedCommandSender)
             return sender.parent.user.id.toString()
@@ -46,24 +49,31 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, CommandSender>(
     override fun getPermissionValue(
         sender: CommandSender,
         node: String
-    ): Tristate {
-        if (sender !is WrappedCommandSender) {
-            return Tristate.TRUE
+    ): Tristate = getPermissionValue0(sender, node)
+
+    companion object {
+        internal fun getPermissionValue0(
+            sender: CommandSender,
+            node: String
+        ): Tristate {
+            if (sender !is WrappedCommandSender) {
+                return Tristate.TRUE
+            }
+            val usr = LPMiraiPlugin.userManager.getIfLoaded(sender.uuid) ?: return Tristate.UNDEFINED
+
+            val options = LPMiraiPlugin.contextManager.getQueryOptions(sender)
+
+            return usr.cachedData.getPermissionData(options)
+                .checkPermission(
+                    node,
+                    PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK
+                )
+                .result()
         }
-        val usr = plugin.userManager.getIfLoaded(sender.uuid) ?: return Tristate.UNDEFINED
-
-        val options = LPMiraiPlugin.contextManager.getQueryOptions(sender)
-
-        return usr.cachedData.getPermissionData(options)
-            .checkPermission(
-                node,
-                PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK
-            )
-            .result()
     }
 
     override fun hasPermission(sender: CommandSender, node: String): Boolean {
-        return getPermissionValue(sender, node) == Tristate.TRUE
+        return getPermissionValue0(sender, node) == Tristate.TRUE
     }
 
     override fun performCommand(sender: CommandSender, command: String) {

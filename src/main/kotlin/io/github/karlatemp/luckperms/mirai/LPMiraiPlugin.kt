@@ -3,11 +3,15 @@
 package io.github.karlatemp.luckperms.mirai
 
 
+import com.google.common.collect.ImmutableMap
+import io.github.karlatemp.luckperms.mirai.commands.ViewMe
+import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
 import kotlinx.coroutines.runBlocking
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
+import me.lucko.luckperms.common.command.abstraction.Command
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter
 import me.lucko.luckperms.common.context.ContextManager
 import me.lucko.luckperms.common.dependencies.Dependency
@@ -40,6 +44,7 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlin.collections.LinkedHashMap
 
 object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
@@ -61,8 +66,9 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     private lateinit var commandManager0: CommandManager
     override fun getCommandManager(): CommandManager = commandManager0
     override fun registerCommands() {
-        commandManager0 = CommandManager(this)
-        val cm = commandManager0
+        val cm = CommandManager(this)
+        commandManager0 = cm
+
         object : AbstractCommand(
             owner = LPMiraiBootstrap,
             names = arrayOf("lp", "luckperms"),
@@ -79,8 +85,10 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     if (this@onCommand is UserCommandSender) {
                         WrappedCommandSender(this@onCommand)
                     } else this@onCommand
-                val sender = senderFactory0.wrap(
-                    target
+                val sender = WrappedLPSender(
+                    senderFactory0.wrap(
+                        target
+                    ), target
                 )
                 cm.executeCommand(sender, "lp", args.asSequence()
                     .flatMap {
@@ -110,6 +118,16 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     }
             }
         }.register(true)
+        // inject command
+        @Suppress("UNCHECKED_CAST")
+        CommandManager::class.java.getDeclaredField("mainCommands").apply {
+            isAccessible = true
+            val old = this[cm] as Map<String, Command<*>>
+            val copied = LinkedHashMap(old)
+            copied["view"] = ViewMe(localeManager)
+            this[cm] = ImmutableMap.copyOf(copied)
+            // Map<String, Command<?>>
+        }
     }
 
     private lateinit var connectionListener0: AbstractConnectionListener
@@ -130,7 +148,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
     override fun getConsoleSender(): Sender = console
 
-    private lateinit var senderFactory0: MiraiSenderFactory
+    internal lateinit var senderFactory0: MiraiSenderFactory
     override fun setupSenderFactory() {
         senderFactory0 = MiraiSenderFactory()
     }
@@ -176,8 +194,22 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     private lateinit var contextManager0: MiraiContextManager
     override fun getContextManager(): MiraiContextManager = contextManager0
 
+    @OptIn(ConsoleExperimentalAPI::class)
     override fun setupContextManager() {
-        contextManager0 = MiraiContextManager()
+        contextManager0 = MiraiContextManager().apply {
+            registerCalculator { target, consumer ->
+                if (target is WrappedCommandSender) {
+                    val real = target.parent
+                    if (real is MemberCommandSender) {
+                        consumer.accept("type", "group")
+                        consumer.accept("level", real.user.permission.name.toLowerCase())
+                        consumer.accept("group", real.group.id.toString())
+                    } else {
+                        consumer.accept("type", "direct")
+                    }
+                }
+            }
+        }
     }
 
     override fun setupPlatformHooks() {
