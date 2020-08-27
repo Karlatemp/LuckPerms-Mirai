@@ -23,6 +23,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Init git submodule
-      run: git submodule init
+      run: git submodule update --init --recursive
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew :build
