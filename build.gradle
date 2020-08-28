@@ -20,10 +20,12 @@ def lpVersion = ({
         }
     }
     return resu
-})()
+})().toString()
 
-// [LuckPerms version]+[LP-Mirai version]
-version '1.0.0-' + lpVersion.replace('-', '+')
+// [LP-Mirai version]-[LuckPerms version]
+def lpMiraiVer = '1.0.1'
+def ver = lpMiraiVer + '-' + lpVersion.replace('-', '+')
+version ver
 
 dependencies {
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
@@ -41,12 +43,18 @@ dependencies {
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
-        expand 'pluginVersion': lpVersion
+        expand([
+                'pluginVersion': ver,
+                'lpVersion'    : lpVersion,
+                'lpmVersion'   : lpMiraiVer
+        ])
         include 'plugin.yml'
+        include 'metainfo.conf'
     }
 }
 
 shadowJar {
+    exclude 'module-info.class'
     relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
@@ -72,3 +80,4 @@ compileKotlin {
                              '-Xjvm-default=enable']
     }
 }
+

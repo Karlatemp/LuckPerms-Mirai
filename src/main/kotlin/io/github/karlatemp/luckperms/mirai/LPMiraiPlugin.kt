@@ -18,6 +18,8 @@ import com.google.common.collect.ImmutableMap
 import io.github.karlatemp.luckperms.mirai.commands.ViewMe
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
+import io.github.karlatemp.luckperms.mirai.util.hasPermission
+import io.github.karlatemp.luckperms.mirai.util.permission
 import kotlinx.coroutines.runBlocking
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
@@ -127,6 +129,21 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                             }
                         }
                     }
+            }
+        }.register(true)
+        object : AbstractCommand(
+            owner = LPMiraiBootstrap,
+            names = arrayOf("lpcheck"),
+            description = "LuckPerms - Checker",
+            permission = permission("luckperms.check"),
+            prefixOptional = true
+        ) {
+            override val usage: String
+                get() = ""
+
+            override suspend fun CommandSender.onCommand(args: Array<out Any>) {
+                val perm = args.joinToString(" ").trim()
+                sendMessage("$perm -> " + hasPermission(perm))
             }
         }.register(true)
         // inject command

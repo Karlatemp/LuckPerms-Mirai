@@ -20,6 +20,8 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import ninja.leaping.configurate.ConfigurationNode
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader
 import java.io.InputStream
 import java.nio.file.Path
 import java.time.Instant
@@ -28,6 +30,17 @@ import java.util.concurrent.CountDownLatch
 
 @Suppress("unused")
 object LPMiraiBootstrap : KotlinPlugin(), LuckPermsBootstrap {
+    private val versionInfo: ConfigurationNode
+
+    init {
+        versionInfo = HoconConfigurationLoader.builder()
+            .setSource {
+                javaClass.classLoader.getResourceAsStream("metainfo.conf")!!.bufferedReader()
+            }
+            .build()
+            .load()
+    }
+
     private val pluginLogger0 by lazy { MiraiPluginLogger(logger) }
 
     override fun getPluginLogger(): PluginLogger = pluginLogger0
@@ -59,12 +72,14 @@ object LPMiraiBootstrap : KotlinPlugin(), LuckPermsBootstrap {
         return "Mirai"
     }
 
-    private val miraiVersion by lazy {
-        "MiraiConsole/" + MiraiConsole.version.toString()
+    private val serverVersion0 by lazy {
+        "MiraiConsole/" + MiraiConsole.version.toString() +
+                " LuckPerms-Mirai/" + versionInfo.getNode("plugin").string +
+                " LuckPerms-Core/" + versionInfo.getNode("luckperms").string
     }
 
     override fun getServerVersion(): String {
-        return miraiVersion
+        return serverVersion0
     }
 
     override fun getDataDirectory(): Path = dataFolderPath

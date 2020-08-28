@@ -70,7 +70,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, CommandSender>(
             if (sender !is WrappedCommandSender) {
                 return Tristate.TRUE
             }
-            val usr = LPMiraiPlugin.userManager.getIfLoaded(sender.uuid) ?: return Tristate.UNDEFINED
+            val usr  = LPMiraiPlugin.userManager.getOrMake(sender.uuid)
 
             val options = LPMiraiPlugin.contextManager.getQueryOptions(sender)
 

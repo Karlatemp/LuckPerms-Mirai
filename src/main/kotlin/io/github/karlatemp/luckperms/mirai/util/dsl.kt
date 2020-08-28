@@ -25,7 +25,7 @@ infix fun CommandSender.hasPermission(
     @OptIn(ConsoleExperimentalAPI::class)
     if (this is UserCommandSender) {
         val wrapped = WrappedCommandSender(this)
-        return MiraiSenderFactory.getPermissionValue0(wrapped, "permission") == Tristate.TRUE
+        return MiraiSenderFactory.getPermissionValue0(wrapped, permission) == Tristate.TRUE
     }
     return true
 }
