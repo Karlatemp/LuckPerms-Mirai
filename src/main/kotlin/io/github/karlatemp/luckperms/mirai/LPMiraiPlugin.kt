@@ -92,18 +92,8 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
             override val usage: String
                 get() = "/lp"
 
-            @OptIn(ConsoleExperimentalAPI::class)
-            override suspend fun CommandSender.onCommand(args: Array<out Any>) {
-                val target =
-                    if (this@onCommand is UserCommandSender) {
-                        WrappedCommandSender(this@onCommand)
-                    } else this@onCommand
-                val sender = WrappedLPSender(
-                    senderFactory0.wrap(
-                        target
-                    ), target
-                )
-                cm.executeCommand(sender, "lp", args.asSequence()
+            suspend fun CommandSender.onCommand(args: MessageChain) {
+                onCommand(args.asSequence()
                     .flatMap {
                         when (it) {
                             is PlainText -> it.content.trim().split(' ')
@@ -115,6 +105,19 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     }
                     .filter { it.isNotBlank() }
                     .toMutableList())
+            }
+
+            suspend fun CommandSender.onCommand(args: MutableList<String>) {
+                val target =
+                    if (this@onCommand is UserCommandSender) {
+                        WrappedCommandSender(this@onCommand)
+                    } else this@onCommand
+                val sender = WrappedLPSender(
+                    senderFactory0.wrap(
+                        target
+                    ), target
+                )
+                cm.executeCommand(sender, "lp", args)
                     .thenAccept {
                         if (target is WrappedCommandSender) {
                             val ms = target.bufferedMessages
@@ -129,6 +132,22 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                             }
                         }
                     }
+            }
+
+            @OptIn(ConsoleExperimentalAPI::class)
+            override suspend fun CommandSender.onCommand(args: Array<out Any>) {
+                onCommand(args.asSequence()
+                    .flatMap {
+                        when (it) {
+                            is PlainText -> it.content.trim().split(' ')
+                            is MessageSource -> emptyList()
+                            is At -> listOf(it.target.toString())
+                            is MessageContent -> listOf(it.content)
+                            else -> it.toString().split(' ')
+                        }
+                    }
+                    .filter { it.isNotBlank() }
+                    .toMutableList())
             }
         }.register(true)
         object : AbstractCommand(

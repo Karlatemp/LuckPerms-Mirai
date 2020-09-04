@@ -21,6 +21,7 @@ import net.mamoe.mirai.console.plugin.description.PluginDependency
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.plugin.jvm.SimpleJvmPluginDescription
+import net.mamoe.mirai.message.data.MessageChain
 
 @AutoService(JvmPlugin::class)
 object OpenLPTest : KotlinPlugin(
@@ -44,13 +45,19 @@ object OpenLPTest : KotlinPlugin(
             override val usage: String
                 get() = ""
 
+            suspend fun CommandSender.onCommand(args: MessageChain) {
+                // Mirai-Console M4-dev-5
+                val perm = args.contentToString()
+                sendMessage("$perm -> " + (this hasPermission perm))
+            }
+
             override suspend fun CommandSender.onCommand(args: Array<out Any>) {
                 val perm = args.joinToString(
                     separator = " ", prefix = "", postfix = ""
                 ) {
                     it.toString()
                 }
-                sendMessage("$perm -> " + (this hasPermission ""))
+                sendMessage("$perm -> " + (this hasPermission perm))
             }
         }.register()
     }
