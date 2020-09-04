@@ -72,6 +72,7 @@ class ViewMe(
                     }
                     val context = LPMiraiPlugin.contextManager.getQueryOptions(
                         WrappedCommandSender(
+                            @Suppress("INVISIBLE_MEMBER")
                             MemberCommandSender(member)
                         )
                     ).context()

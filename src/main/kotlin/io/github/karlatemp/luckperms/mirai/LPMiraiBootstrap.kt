@@ -11,6 +11,7 @@
 
 package io.github.karlatemp.luckperms.mirai
 
+import com.google.auto.service.AutoService
 import io.github.karlatemp.luckperms.mirai.logging.MiraiPluginLogger
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader
@@ -19,27 +20,37 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
+import net.mamoe.mirai.console.plugin.description.PluginKind
+import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import net.mamoe.mirai.console.plugin.jvm.SimpleJvmPluginDescription
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
 import java.io.InputStream
+import java.lang.invoke.MethodHandles
 import java.nio.file.Path
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
-@Suppress("unused")
-object LPMiraiBootstrap : KotlinPlugin(), LuckPermsBootstrap {
-    private val versionInfo: ConfigurationNode
+private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().setSource {
+    MethodHandles.lookup().lookupClass().classLoader.getResourceAsStream("metainfo.conf")!!
+        .bufferedReader()
+}
+    .build()
+    .load()
 
-    init {
-        versionInfo = HoconConfigurationLoader.builder()
-            .setSource {
-                javaClass.classLoader.getResourceAsStream("metainfo.conf")!!.bufferedReader()
-            }
-            .build()
-            .load()
-    }
+@AutoService(JvmPlugin::class)
+@Suppress("unused")
+object LPMiraiBootstrap : KotlinPlugin(
+    SimpleJvmPluginDescription(
+        name = "LuckPerms",
+        info = "LuckPerms on MiraiConsole",
+        version = versionInfo.getNode("pluginVersion").string!!,
+        author = "lucko & Karlatemp",
+        kind = PluginKind.LOADER
+    )
+), LuckPermsBootstrap {
 
     private val pluginLogger0 by lazy { MiraiPluginLogger(logger) }
 

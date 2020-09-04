@@ -171,7 +171,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     }
 
     private val console by lazy {
-        senderFactory0.wrap(ConsoleCommandSender.instance)
+        senderFactory0.wrap(ConsoleCommandSender.INSTANCE)
     }
 
     override fun getConsoleSender(): Sender = console

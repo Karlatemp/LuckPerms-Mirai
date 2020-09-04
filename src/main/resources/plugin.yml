@@ -1,3 +1,5 @@
 name: LuckPerms
 main: io.github.karlatemp.luckperms.mirai.LPMiraiBootstrap
 version: ${pluginVersion}
+# The permission service must be load first.
+kind: LOADER

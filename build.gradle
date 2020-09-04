@@ -2,13 +2,7 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.4.0'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
-}
-
-group 'io.github.karlatemp'
-
-repositories {
-    mavenCentral()
-    jcenter()
+    id 'org.jetbrains.kotlin.kapt' version '1.4.0'
 }
 
 def lpVersion = ({
@@ -23,22 +17,45 @@ def lpVersion = ({
 })().toString()
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.0.1'
+def lpMiraiVer = '1.2.0'
 def ver = lpMiraiVer + '-' + lpVersion.replace('-', '+')
-version ver
+
+allprojects {
+    group 'io.github.karlatemp.mirai.luckperms'
+    version ver
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = '1.8'
+            freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
+                                 '-Xjvm-default=enable']
+        }
+    }
+
+}
 
 dependencies {
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
-    compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.18'
+    compileOnly group: 'org.fusesource.jansi', name: 'jansi', version: '1.18'
     compile 'org.spongepowered:configurate-hocon:3.7.1'
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 
     compile "me.lucko.luckperms:common" // LuckPerms
     compileOnly("net.mamoe:mirai-core:1.2.2")
-    compileOnly("net.mamoe:mirai-console:1.0-M3") // 后端
+    compileOnly("net.mamoe:mirai-console:1.0-M4-dev-3") // 后端
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    def autoService = '1.0-rc7'
+    kapt "com.google.auto.service:auto-service:$autoService"
+    compileOnly "com.google.auto.service:auto-service-annotations:$autoService"
+
 }
 
 processResources {
@@ -71,13 +88,5 @@ shadowJar {
     relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
     relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
     relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
-}
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = '1.8'
-        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
-                             '-Xjvm-default=enable']
-    }
 }
 

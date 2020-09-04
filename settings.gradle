@@ -1,3 +1,4 @@
 rootProject.name = 'LuckPerms-Mirai'
 
 includeBuild('LuckPerms')
+include(':test-plugin')

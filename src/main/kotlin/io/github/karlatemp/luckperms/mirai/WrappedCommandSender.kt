@@ -16,10 +16,13 @@ import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.console.command.GroupAwareCommandSender
 import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
+import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.contact.User
 import net.mamoe.mirai.message.data.Message
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.coroutines.CoroutineContext
 
 //@JvmDefault
 
@@ -27,6 +30,17 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class WrappedCommandSender(
     val parent: UserCommandSender
 ) : CommandSender {
+    override val coroutineContext: CoroutineContext
+        get() = parent.coroutineContext
+    override val subject: Contact?
+        get() = parent.subject
+    override val user: User?
+        get() = parent.user
+
+    override suspend fun catchExecutionException(e: Throwable) {
+        parent.catchExecutionException(e)
+    }
+
     override val bot: Bot
         get() = parent.bot
     override val name: String
@@ -50,16 +64,18 @@ class WrappedCommandSender(
     }
 
     var bufferedMessages: ConcurrentLinkedQueue<String>? = ConcurrentLinkedQueue()
-    override suspend fun sendMessage(message: Message) {
+    override suspend fun sendMessage(message: Message): Nothing? {
         sendMessage(message.contentToString())
+        return null
     }
 
-    override suspend fun sendMessage(message: String) {
+    override suspend fun sendMessage(message: String): Nothing? {
         val m = bufferedMessages
         if (m == null) {
             parent.sendMessage(message)
         } else {
             m.add(message)
         }
+        return null
     }
 }
