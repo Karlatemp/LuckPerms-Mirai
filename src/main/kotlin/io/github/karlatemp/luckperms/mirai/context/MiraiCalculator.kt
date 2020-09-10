@@ -14,15 +14,22 @@ package io.github.karlatemp.luckperms.mirai.context
 import net.luckperms.api.context.ContextCalculator
 import net.luckperms.api.context.ContextConsumer
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.console.command.MemberCommandSender
 import net.mamoe.mirai.console.permission.AbstractPermissibleIdentifier
 import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.PermissibleIdentifier
+import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.getGroupOrNull
 
 @OptIn(ExperimentalPermission::class)
 object MiraiCalculator : ContextCalculator<PermissibleIdentifier> {
+    private fun scanMember(group: Long, member: Long): Member? {
+        Bot.botInstancesSequence.forEach { bot ->
+            bot.getGroupOrNull(group)?.getOrNull(member)?.let { return it }
+        }
+        return null
+    }
+
     override fun calculate(target: PermissibleIdentifier, consumer: ContextConsumer) {
         when (target) {
             is AbstractPermissibleIdentifier -> {
@@ -40,18 +47,21 @@ object MiraiCalculator : ContextCalculator<PermissibleIdentifier> {
                     is AbstractPermissibleIdentifier.ExactMember -> {
                         consumer.accept("type", "group")
                         consumer.accept("group", target.groupId.toString())
-                        // TODO: get bot
-                        Bot.botInstances[0].getGroupOrNull(target.groupId)?.getOrNull(target.memberId)?.let { member ->
+                        scanMember(target.groupId, target.memberId)?.let { member ->
                             consumer.accept("level", member.permission.name.toLowerCase())
                             consumer.accept("admin", member.permission.isOperator().toString())
                         }
-
                     }
                     is AbstractPermissibleIdentifier.ExactFriend -> {
                         consumer.accept("type", "friend")
                     }
                     is AbstractPermissibleIdentifier.ExactTemp -> {
                         consumer.accept("type", "temp")
+                        consumer.accept("group", target.groupId.toString())
+                        scanMember(target.groupId, target.memberId)?.let { member ->
+                            consumer.accept("level", member.permission.name.toLowerCase())
+                            consumer.accept("admin", member.permission.isOperator().toString())
+                        }
                     }
                     AbstractPermissibleIdentifier.AnyGroup -> {
                     }
@@ -61,7 +71,11 @@ object MiraiCalculator : ContextCalculator<PermissibleIdentifier> {
                     AbstractPermissibleIdentifier.AnyFriend -> {
                         consumer.accept("mode", "friend")
                     }
-                    AbstractPermissibleIdentifier.AnyTemp -> {
+                    is AbstractPermissibleIdentifier.AnyTemp -> {
+                        consumer.accept("mode", "temp")
+                        consumer.accept("group", target.groupId.toString())
+                    }
+                    AbstractPermissibleIdentifier.AnyTempFromAnyGroup -> {
                         consumer.accept("mode", "temp")
                     }
                     AbstractPermissibleIdentifier.AnyUser -> {

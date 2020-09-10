@@ -21,7 +21,7 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
-import net.mamoe.mirai.console.plugin.description.PluginKind
+import net.mamoe.mirai.console.plugin.description.PluginLoadPriority
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
@@ -48,7 +48,7 @@ object LPMiraiBootstrap : KotlinPlugin(
         "LuckPerms", versionInfo.getNode("pluginVersion").string!!
     )
         .id("io.github.karlatemp.luckperms-mirai")
-        .kind(PluginKind.HIGH_PRIORITY_EXTENSIONS)
+        .kind(PluginLoadPriority.BEFORE_EXTENSIONS)
         .author("lucko & Karlatemp")
         .build()
 ), LuckPermsBootstrap {

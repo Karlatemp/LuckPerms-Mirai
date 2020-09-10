@@ -33,7 +33,7 @@ internal object LPPP : PermissionServiceProvider {
 }
 
 internal open class LuckPermsPermission(
-    override val parentId: PermissionId,
+    override val parent: Permission,
     override val description: String,
     override val id: PermissionId,
     val internalId: String,
@@ -44,16 +44,35 @@ internal open class LuckPermsPermission(
     }
 }
 
+internal object TempPermissionInitPlaceholder : Permission {
+    override val description: String
+        get() = error("")
+    override val id: PermissionId
+        get() = error("")
+    override val parent: Permission
+        get() = error("")
+
+}
+
 private val AnyID = PermissionId("", "")
 
 internal object AnyOne : LuckPermsPermission(
-    AnyID, "", AnyID, ".", null
+    ROOT, "", AnyID, ".", null
 )
 
 internal val ROOT_IND = PermissionId("*", "*")
 
 internal object ROOT : LuckPermsPermission(
-    ROOT_IND, "The root of permissions.", ROOT_IND, "*", null
+    TempPermissionInitPlaceholder, "The root of permissions.", ROOT_IND, "*", null
+) {
+    override val parent: Permission
+        get() = this
+}
+
+internal object Magic_NO_REGISTER_CHECK : LuckPermsPermission(
+    ROOT, "Magic code of LuckPerms Mirai",
+    PermissionId("<lp>", "#"),
+    "<lp>.#", null
 )
 
 @OptIn(ExperimentalPermission::class)
@@ -65,6 +84,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         permissions["."] = AnyOne
         permissions[""] = AnyOne
         permissions["*"] = ROOT
+        permissions["<lp>.#"] = Magic_NO_REGISTER_CHECK
     }
 
 
@@ -89,24 +109,23 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         return emptySequence()
     }
 
-    override fun register(id: PermissionId, description: String, base: PermissionId): LuckPermsPermission {
+    override val rootPermission: LuckPermsPermission
+        get() = ROOT
+
+    override fun register(id: PermissionId, description: String, base0: Permission): LuckPermsPermission {
         val internalId = id.lp()
         if (internalId == "*") {
             return ROOT
         }
-        val pinternal = base.lp()
+        val base = base0 as LuckPermsPermission
         val perm = LuckPermsPermission(
-            base, description, id, internalId, when (pinternal) {
-                "", "." -> AnyOne
-                "*" -> ROOT
-                "<lp>.#" -> null
-                else -> {
-                    permissions[pinternal] ?: throw PermissionNotFoundException(base)
-                }
+            base, description, id, internalId, when (base) {
+                Magic_NO_REGISTER_CHECK -> null
+                else -> base
             }
         )
         // Magic code
-        if (pinternal == "<lp>.#") return perm
+        if (base0 === Magic_NO_REGISTER_CHECK) return perm
         val old = permissions.putIfAbsent(internalId, perm)
         if (old !== null) {
             permissions[internalId] = old
@@ -153,11 +172,12 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId)
                     }
                     is AbstractPermissibleIdentifier.ExactTemp -> {
-                        UUID(MAGIC_UUID_HIGH_BITS, identifier.id)
+                        UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId)
                     }
                     is AbstractPermissibleIdentifier.ExactUser -> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.id)
                     }
+                    AbstractPermissibleIdentifier.AnyTempFromAnyGroup -> UUID_ANY_MEMBER_SELECTOR
                 }
             }
             else -> {
