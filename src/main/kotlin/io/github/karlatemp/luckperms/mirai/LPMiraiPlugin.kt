@@ -19,7 +19,7 @@ import io.github.karlatemp.luckperms.mirai.commands.ViewMe
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
-import io.github.karlatemp.luckperms.mirai.internal.AnyOne
+import io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.util.hasPermission
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
@@ -99,7 +99,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
             @ExperimentalPermission
             override val permission: Permission
-                get() = AnyOne
+                get() = Magic_NO_PERMISSION_CHECK
 
             override suspend fun CommandSender.onCommand(args: MessageChain) {
                 onCommand(args.asSequence()

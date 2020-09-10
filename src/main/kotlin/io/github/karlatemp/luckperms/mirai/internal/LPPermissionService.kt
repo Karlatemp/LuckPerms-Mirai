@@ -10,6 +10,7 @@
  */
 
 @file:OptIn(ExperimentalPermission::class, ConsoleExperimentalAPI::class)
+@file:Suppress("ClassName")
 
 package io.github.karlatemp.luckperms.mirai.internal
 
@@ -40,25 +41,32 @@ internal open class LuckPermsPermission(
     val parentPermission: LuckPermsPermission?
 ) : Permission {
     override fun toString(): String {
-        return "LuckPermission{$internalId}"
+        return "<$internalId>"
     }
 }
 
 internal object TempPermissionInitPlaceholder : Permission {
     override val description: String
-        get() = error("")
+        get() = "TEMP INITIALIZE PLACEHOLDER"
     override val id: PermissionId
-        get() = error("")
+        get() = PermissionId("<lp>", "##TEMP INIT PLACEHOLDER##")
     override val parent: Permission
-        get() = error("")
+        get() = this
 
+    override fun toString(): String {
+        return "TempPermissionInitPlaceholder"
+    }
 }
 
 private val AnyID = PermissionId("", "")
 
-internal object AnyOne : LuckPermsPermission(
+internal object Magic_NO_PERMISSION_CHECK : LuckPermsPermission(
     ROOT, "", AnyID, ".", null
-)
+) {
+    override fun toString(): String {
+        return "Magic[No Permission Check]"
+    }
+}
 
 internal val ROOT_IND = PermissionId("*", "*")
 
@@ -67,13 +75,21 @@ internal object ROOT : LuckPermsPermission(
 ) {
     override val parent: Permission
         get() = this
+
+    override fun toString(): String {
+        return "Magic[Root]"
+    }
 }
 
 internal object Magic_NO_REGISTER_CHECK : LuckPermsPermission(
     ROOT, "Magic code of LuckPerms Mirai",
     PermissionId("<lp>", "#"),
     "<lp>.#", null
-)
+) {
+    override fun toString(): String {
+        return "Magic[No Register Check]"
+    }
+}
 
 @OptIn(ExperimentalPermission::class)
 internal object LPPermissionService : PermissionService<LuckPermsPermission> {
@@ -81,8 +97,8 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
 
     init {
         PermissionServiceProvider.registerExtension(LPMiraiBootstrap, LPPP)
-        permissions["."] = AnyOne
-        permissions[""] = AnyOne
+        permissions["."] = Magic_NO_PERMISSION_CHECK
+        permissions[""] = Magic_NO_PERMISSION_CHECK
         permissions["*"] = ROOT
         permissions["<lp>.#"] = Magic_NO_REGISTER_CHECK
     }
@@ -112,12 +128,12 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     override val rootPermission: LuckPermsPermission
         get() = ROOT
 
-    override fun register(id: PermissionId, description: String, base0: Permission): LuckPermsPermission {
+    override fun register(id: PermissionId, description: String, parent: Permission): LuckPermsPermission {
         val internalId = id.lp()
         if (internalId == "*") {
             return ROOT
         }
-        val base = base0 as LuckPermsPermission
+        val base = parent as LuckPermsPermission
         val perm = LuckPermsPermission(
             base, description, id, internalId, when (base) {
                 Magic_NO_REGISTER_CHECK -> null
@@ -125,7 +141,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             }
         )
         // Magic code
-        if (base0 === Magic_NO_REGISTER_CHECK) return perm
+        if (parent === Magic_NO_REGISTER_CHECK) return perm
         val old = permissions.putIfAbsent(internalId, perm)
         if (old !== null) {
             permissions[internalId] = old
@@ -199,7 +215,11 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         permission: LuckPermsPermission
     ): Boolean {
         when (permission) {
-            AnyOne -> return true
+            Magic_NO_PERMISSION_CHECK -> return true
+            Magic_NO_REGISTER_CHECK -> {
+                LPMiraiPlugin.logger.warn("Warning: Magic[No Register Check](<lp>:#) should is not checkable.")
+                return false
+            }
         }
         if (permissibleIdentifier is AbstractPermissibleIdentifier.Console) {
             permission.internalId.logConsole()
@@ -210,20 +230,34 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         val permissionData = usr.cachedData.getPermissionData(
             LPMiraiPlugin.contextManager.getQueryOptions(permissibleIdentifier)
         )
-        return testPermission(permissionData, permission)
+        return testPermission(permission, permissionData, permission)
     }
 
     private fun testPermission(
+        startPermission: LuckPermsPermission,
         permissionData: PermissionCache,
         permission: LuckPermsPermission
     ): Boolean {
-        if (permission === AnyOne) return true
+        if (permission === Magic_NO_PERMISSION_CHECK) return true
+        // It should be discarded at #register
+        if (permission === Magic_NO_REGISTER_CHECK) {
+            LPMiraiPlugin.logger.severe("Error: Oops. LuckPerms Mirai got a logic error.")
+            LPMiraiPlugin.logger.severe("Please report it to https://github.com/Karlatemp/LuckPerms-Mirai")
+            // gen report
+            var p: LuckPermsPermission? = startPermission
+            while (p != null) {
+                val pw = p
+                p = pw.parentPermission
+                LPMiraiPlugin.logger.severe("  - $pw, lp-id = ${pw.internalId}, mc-id = ${pw.id}, desc = ${pw.description}")
+            }
+            return false
+        }
         val perm =
             permissionData.checkPermission(permission.internalId, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK)
         if (perm.result() == Tristate.UNDEFINED) {
             val pp = permission.parentPermission
             if (pp != null) {
-                return testPermission(permissionData, pp)
+                return testPermission(startPermission, permissionData, pp)
             }
         }
         return perm.result().asBoolean()
