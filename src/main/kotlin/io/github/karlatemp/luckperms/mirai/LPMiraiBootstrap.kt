@@ -12,6 +12,7 @@
 package io.github.karlatemp.luckperms.mirai
 
 import com.google.auto.service.AutoService
+import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.logging.MiraiPluginLogger
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader
@@ -22,8 +23,8 @@ import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.plugin.description.PluginKind
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
+import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
-import net.mamoe.mirai.console.plugin.jvm.SimpleJvmPluginDescription
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
 import java.io.InputStream
@@ -43,13 +44,13 @@ private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().
 @AutoService(JvmPlugin::class)
 @Suppress("unused")
 object LPMiraiBootstrap : KotlinPlugin(
-    SimpleJvmPluginDescription(
-        name = "LuckPerms",
-        info = "LuckPerms on MiraiConsole",
-        version = versionInfo.getNode("pluginVersion").string!!,
-        author = "lucko & Karlatemp",
-        kind = PluginKind.LOADER
+    JvmPluginDescriptionBuilder(
+        "LuckPerms", versionInfo.getNode("pluginVersion").string!!
     )
+        .id("io.github.karlatemp.luckperms-mirai")
+        .kind(PluginKind.HIGH_PRIORITY_EXTENSIONS)
+        .author("lucko & Karlatemp")
+        .build()
 ), LuckPermsBootstrap {
 
     private val pluginLogger0 by lazy { MiraiPluginLogger(logger) }
@@ -151,6 +152,10 @@ object LPMiraiBootstrap : KotlinPlugin(
         } finally {
             this.loadLatch.countDown()
         }
+    }
+
+    init {
+        LPPermissionService
     }
 
     override fun onEnable() {

@@ -25,13 +25,13 @@ object MiraiCalculatorFactory : CalculatorFactory {
         val processors = ImmutableList.builder<PermissionProcessor>()
         processors.add(MapProcessor())
         val plugin = LPMiraiPlugin
-        if (plugin.getConfiguration().get<Boolean>(ConfigKeys.APPLYING_REGEX)) {
+        if (plugin.configuration.get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(RegexProcessor())
         }
-        if (plugin.getConfiguration().get<Boolean>(ConfigKeys.APPLYING_WILDCARDS)) {
+        if (plugin.configuration.get(ConfigKeys.APPLYING_WILDCARDS)) {
             processors.add(WildcardProcessor())
         }
-        if (plugin.getConfiguration().get<Boolean>(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
+        if (plugin.configuration.get(ConfigKeys.APPLYING_WILDCARDS_SPONGE)) {
             processors.add(SpongeWildcardProcessor())
         }
         return PermissionCalculator(plugin, metadata, processors.build())

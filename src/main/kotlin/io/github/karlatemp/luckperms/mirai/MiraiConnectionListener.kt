@@ -17,10 +17,10 @@ import net.mamoe.mirai.event.subscribeAlways
 import net.mamoe.mirai.message.MessageEvent
 import net.mamoe.mirai.message.data.At
 import java.util.*
-import kotlin.math.min
 
 class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
     fun registerListeners() {
+
         LPMiraiBootstrap.subscribeAlways<MessageEvent>(
             priority = Listener.EventPriority.HIGHEST
         ) {

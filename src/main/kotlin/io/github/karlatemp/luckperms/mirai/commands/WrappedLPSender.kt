@@ -12,12 +12,11 @@
 package io.github.karlatemp.luckperms.mirai.commands
 
 import me.lucko.luckperms.common.command.access.CommandPermission
-import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
+import me.lucko.luckperms.common.util.TextUtils
 import net.kyori.text.Component
-import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.CommandSender
-import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 class WrappedLPSender(
     val delegate: Sender,
@@ -31,9 +30,25 @@ class WrappedLPSender(
 
     override fun getUniqueId() = delegate.uniqueId
 
-    override fun sendMessage(message: String?) = delegate.sendMessage(message)
+    private val cachedMessages = ArrayList<String>(16)
+    private val cache = AtomicBoolean(true)
+    private val writingLock = AtomicBoolean()
+    override fun sendMessage(message: String) {
+        @Suppress("ControlFlowWithEmptyBody")
+        while (writingLock.compareAndSet(false, true)) {
+        }
+        if (cache.get()) {
+            cachedMessages.add(message)
+            writingLock.set(false)
+        } else {
+            writingLock.set(false)
+            delegate.sendMessage(message)
+        }
+    }
 
-    override fun sendMessage(message: Component?) = delegate.sendMessage(message)
+    override fun sendMessage(message: Component?) {
+        sendMessage(TextUtils.toLegacy(message ?: return))
+    }
 
     override fun getPermissionValue(permission: String?) = delegate.getPermissionValue(permission)
 
@@ -46,4 +61,19 @@ class WrappedLPSender(
     override fun isConsole() = delegate.isConsole
 
     override fun isValid() = delegate.isValid
+    fun flush() {
+        @Suppress("ControlFlowWithEmptyBody")
+        while (writingLock.compareAndSet(false, true)) {
+        }
+        if (cache.get()) {
+            cache.set(false)
+            val msg = cachedMessages
+            writingLock.set(false)
+            if (msg.isNotEmpty()) {
+                delegate.sendMessage(msg.joinToString("\n"))
+            }
+        } else {
+            writingLock.set(false)
+        }
+    }
 }

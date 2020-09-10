@@ -1,4 +1,22 @@
 rootProject.name = 'LuckPerms-Mirai'
 
 includeBuild('LuckPerms')
+
+/*
+({
+    def settings = new Properties()
+    def file = new File("./settings.properties")
+    if (file.isFile()) {
+        file.withReader { settings.load(it) }
+        includeBuild(settings.getProperty("console"))
+    } else {
+        def console = new File("mirai-console")
+        if (!console.isDirectory()) {
+            Runtime.getRuntime().exec("git clone https://github.com/mamoe/mirai-console.git")
+        }
+        includeBuild("mirai-console")
+    }
+})()
+*/
+
 include(':test-plugin')

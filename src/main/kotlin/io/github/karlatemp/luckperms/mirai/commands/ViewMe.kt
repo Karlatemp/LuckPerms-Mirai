@@ -12,7 +12,6 @@
 package io.github.karlatemp.luckperms.mirai.commands
 
 import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
-import io.github.karlatemp.luckperms.mirai.WrappedCommandSender
 import me.lucko.luckperms.common.command.CommandResult
 import me.lucko.luckperms.common.command.abstraction.SingleCommand
 import me.lucko.luckperms.common.command.access.CommandPermission
@@ -21,7 +20,6 @@ import me.lucko.luckperms.common.locale.LocaleManager
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.util.Predicates
-import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.MemberCommandSender
 import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
 
@@ -46,13 +44,9 @@ class ViewMe(
     ): CommandResult {
         if (sender is WrappedLPSender) {
             val real = sender.real
-            if (real !is WrappedCommandSender) {
-                sender.sendMessage("§cOnly use in chat.")
-                return CommandResult.STATE_ERROR
-            }
             if (args.isEmpty()) {
                 // dump me
-                val context = LPMiraiPlugin.contextManager.getQueryOptions(real)
+                val context = LPMiraiPlugin.contextManager.getQueryOptions(real.identifier)
                     .context()
                 sender.sendMessage(context.joinToString(", ", "(", ")") {
                     "${it.key}=${it.value}"
@@ -63,7 +57,7 @@ class ViewMe(
                     sender.sendMessage("Sorry, $target is not a valid number.")
                     return CommandResult.INVALID_ARGS
                 }
-                val unboxed = real.parent
+                val unboxed = real
                 if (unboxed is MemberCommandSender) {
                     val member = unboxed.group.getOrNull(target)
                     if (member == null) {
@@ -71,10 +65,8 @@ class ViewMe(
                         return CommandResult.INVALID_ARGS
                     }
                     val context = LPMiraiPlugin.contextManager.getQueryOptions(
-                        WrappedCommandSender(
-                            @Suppress("INVISIBLE_MEMBER")
-                            MemberCommandSender(member)
-                        )
+                        @Suppress("INVISIBLE_MEMBER")
+                        MemberCommandSender(member).identifier
                     ).context()
                     sender.sendMessage(context.joinToString(", ", "(", ")") {
                         "${it.key}=${it.value}"

@@ -13,59 +13,56 @@ package io.github.karlatemp.luckperms.mirai.context
 
 import com.github.benmanes.caffeine.cache.LoadingCache
 import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
-import io.github.karlatemp.luckperms.mirai.MAGIC_UUID_HIGH_BITS
-import io.github.karlatemp.luckperms.mirai.WrappedCommandSender
+import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import me.lucko.luckperms.common.context.ContextManager
 import me.lucko.luckperms.common.context.QueryOptionsSupplier
-import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.util.CaffeineFactory
 import net.luckperms.api.context.ImmutableContextSet
 import net.luckperms.api.query.QueryOptions
-import net.mamoe.mirai.console.command.CommandSender
-import net.mamoe.mirai.console.command.UserCommandSender
-import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
+import net.mamoe.mirai.console.permission.ExperimentalPermission
+import net.mamoe.mirai.console.permission.Permissible
+import net.mamoe.mirai.console.permission.PermissibleIdentifier
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class MiraiContextManager : ContextManager<CommandSender, CommandSender>(
-    LPMiraiPlugin, CommandSender::class.java, CommandSender::class.java
+@OptIn(ExperimentalPermission::class)
+class MiraiContextManager : ContextManager<PermissibleIdentifier, PermissibleIdentifier>(
+    LPMiraiPlugin, PermissibleIdentifier::class.java, PermissibleIdentifier::class.java
 ) {
-
     private val contextsCache = CaffeineFactory.newBuilder()
         .expireAfterWrite(50, TimeUnit.MILLISECONDS)
-        .build { subject: CommandSender ->
+        .build { subject: PermissibleIdentifier ->
             calculate(subject)
         }
 
-    override fun getUniqueId(sender: CommandSender?): UUID {
-        return if (sender is WrappedCommandSender)
-            sender.uuid
-        else Sender.CONSOLE_UUID
+    override fun getUniqueId(sender: PermissibleIdentifier): UUID {
+        return sender.uuid()
     }
 
-    override fun getCacheFor(subject: CommandSender): QueryOptionsSupplier {
+    override fun getCacheFor(subject: PermissibleIdentifier): QueryOptionsSupplier {
         return InlineQueryOptionsSupplier(subject, this.contextsCache)
     }
 
-    override fun formQueryOptions(subject: CommandSender?, contextSet: ImmutableContextSet?): QueryOptions {
-        return formQueryOptions(contextSet);
+    override fun formQueryOptions(subject: PermissibleIdentifier?, contextSet: ImmutableContextSet?): QueryOptions {
+        return formQueryOptions(contextSet)
     }
 
-    override fun getContext(subject: CommandSender): ImmutableContextSet {
+    override fun getContext(subject: PermissibleIdentifier): ImmutableContextSet {
         return getQueryOptions(subject).context()
     }
 
-    override fun invalidateCache(subject: CommandSender?) {
+
+    override fun invalidateCache(subject: PermissibleIdentifier?) {
         contextsCache.invalidate(subject ?: return)
     }
 
-    override fun getQueryOptions(subject: CommandSender): QueryOptions {
-        return this.contextsCache.get(subject)!!
+    override fun getQueryOptions(subject: PermissibleIdentifier): QueryOptions {
+        return contextsCache[subject]!!
     }
 
     private class InlineQueryOptionsSupplier(
-        private val sender: CommandSender,
-        private val cache: LoadingCache<CommandSender, QueryOptions>
+        private val sender: PermissibleIdentifier,
+        private val cache: LoadingCache<PermissibleIdentifier, QueryOptions>
     ) : QueryOptionsSupplier {
         override fun getQueryOptions(): QueryOptions = cache[sender]!!
     }

@@ -17,16 +17,16 @@ package io.github.karlatemp.luckperms.mirai
 import com.google.common.collect.ImmutableMap
 import io.github.karlatemp.luckperms.mirai.commands.ViewMe
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
+import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
+import io.github.karlatemp.luckperms.mirai.internal.AnyOne
+import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.util.hasPermission
-import io.github.karlatemp.luckperms.mirai.util.permission
-import kotlinx.coroutines.runBlocking
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
 import me.lucko.luckperms.common.command.abstraction.Command
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter
-import me.lucko.luckperms.common.context.ContextManager
 import me.lucko.luckperms.common.dependencies.Dependency
 import me.lucko.luckperms.common.event.AbstractEventBus
 import me.lucko.luckperms.common.messaging.MessagingFactory
@@ -47,8 +47,12 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask
 import me.lucko.luckperms.common.util.MoreFiles
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.query.QueryOptions
-import net.mamoe.mirai.console.command.*
+import net.mamoe.mirai.console.command.AbstractCommand
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
+import net.mamoe.mirai.console.command.CommandSender
+import net.mamoe.mirai.console.command.ConsoleCommandSender
+import net.mamoe.mirai.console.permission.ExperimentalPermission
+import net.mamoe.mirai.console.permission.Permission
 import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
 import net.mamoe.mirai.message.data.*
 import java.io.IOException
@@ -84,15 +88,20 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
         object : AbstractCommand(
             owner = LPMiraiBootstrap,
-            names = arrayOf("lp", "luckperms"),
+            names = arrayOf("luckperms", "lp"),
             description = "LuckPerms",
-            permission = CommandPermission.Any,
+            // permission = CommandPermission.Any,
             prefixOptional = true
         ) {
+            override val names: Array<out String> = arrayOf("luckperms", "lp", "luckperms:lp", "luckperms:luckperms")
             override val usage: String
                 get() = "/lp"
 
-            suspend fun CommandSender.onCommand(args: MessageChain) {
+            @ExperimentalPermission
+            override val permission: Permission
+                get() = AnyOne
+
+            override suspend fun CommandSender.onCommand(args: MessageChain) {
                 onCommand(args.asSequence()
                     .flatMap {
                         when (it) {
@@ -107,62 +116,41 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     .toMutableList())
             }
 
-            suspend fun CommandSender.onCommand(args: MutableList<String>) {
-                val target =
-                    if (this@onCommand is UserCommandSender) {
-                        WrappedCommandSender(this@onCommand)
-                    } else this@onCommand
+            fun CommandSender.onCommand(args: MutableList<String>) {
                 val sender = WrappedLPSender(
                     senderFactory0.wrap(
-                        target
-                    ), target
+                        this@onCommand
+                    ), this@onCommand
                 )
                 cm.executeCommand(sender, "lp", args)
                     .thenAccept {
-                        if (target is WrappedCommandSender) {
-                            val ms = target.bufferedMessages
-                            target.bufferedMessages = null
-                            if (ms != null && !ms.isEmpty()) {
-                                val msg = ms.joinToString("\n").also {
-                                    ms.clear()
-                                }
-                                runBlocking {
-                                    sendMessage(msg)
-                                }
-                            }
-                        }
+                        sender.flush()
                     }
             }
 
-            @OptIn(ConsoleExperimentalAPI::class)
-            override suspend fun CommandSender.onCommand(args: Array<out Any>) {
-                onCommand(args.asSequence()
-                    .flatMap {
-                        when (it) {
-                            is PlainText -> it.content.trim().split(' ')
-                            is MessageSource -> emptyList()
-                            is At -> listOf(it.target.toString())
-                            is MessageContent -> listOf(it.content)
-                            else -> it.toString().split(' ')
-                        }
-                    }
-                    .filter { it.isNotBlank() }
-                    .toMutableList())
-            }
         }.register(true)
         object : AbstractCommand(
             owner = LPMiraiBootstrap,
             names = arrayOf("lpcheck"),
             description = "LuckPerms - Checker",
-            permission = permission("luckperms.check"),
+            // permission = CommandPermission.Any,
             prefixOptional = true
         ) {
             override val usage: String
                 get() = ""
 
-            override suspend fun CommandSender.onCommand(args: Array<out Any>) {
-                val perm = args.joinToString(" ").trim()
+            override suspend fun CommandSender.onCommand(args: MessageChain) {
+                val perm = args.contentToString().trim()
                 sendMessage("$perm -> " + hasPermission(perm))
+                val id = identifier
+                val data = id.uuid()
+                println(data)
+                val usr = LPMiraiPlugin.userManager.getOrMake(data)
+
+                val options = LPMiraiPlugin.contextManager.getQueryOptions(id)
+                println(options.context())
+                println(usr.cachedData.getPermissionData(options).permissionMap)
+
             }
         }.register(true)
         // inject command
@@ -244,18 +232,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     @OptIn(ConsoleExperimentalAPI::class)
     override fun setupContextManager() {
         contextManager0 = MiraiContextManager().apply {
-            registerCalculator { target, consumer ->
-                if (target is WrappedCommandSender) {
-                    val real = target.parent
-                    if (real is MemberCommandSender) {
-                        consumer.accept("type", "group")
-                        consumer.accept("level", real.user.permission.name.toLowerCase())
-                        consumer.accept("group", real.group.id.toString())
-                    } else {
-                        consumer.accept("type", "direct")
-                    }
-                }
-            }
+            registerCalculator(MiraiCalculator)
         }
     }
 

@@ -12,22 +12,16 @@
 package io.github.karlatemp.luckperms.mirai.util
 
 import io.github.karlatemp.luckperms.mirai.MiraiSenderFactory
-import io.github.karlatemp.luckperms.mirai.WrappedCommandSender
 import net.luckperms.api.util.Tristate
-import net.mamoe.mirai.console.command.CommandPermission
-import net.mamoe.mirai.console.command.CommandSender
-import net.mamoe.mirai.console.command.UserCommandSender
-import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
+//import net.mamoe.mirai.console.command.CommandPermission
+import net.mamoe.mirai.console.permission.ExperimentalPermission
+import net.mamoe.mirai.console.permission.Permissible
 
-infix fun CommandSender.hasPermission(
+@OptIn(ExperimentalPermission::class)
+infix fun Permissible.hasPermission(
     permission: String
 ): Boolean {
-    @OptIn(ConsoleExperimentalAPI::class)
-    if (this is UserCommandSender) {
-        val wrapped = WrappedCommandSender(this)
-        return MiraiSenderFactory.getPermissionValue0(wrapped, permission) == Tristate.TRUE
-    }
-    return true
+    return MiraiSenderFactory.getPermissionValue0(this, permission) == Tristate.TRUE
 }
 
-fun permission(permission: String) = CommandPermission { hasPermission(permission) }
+//fun permission(permission: String) = CommandPermission { hasPermission(permission) }
