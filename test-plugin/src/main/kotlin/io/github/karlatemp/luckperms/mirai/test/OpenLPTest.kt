@@ -12,53 +12,78 @@
 package io.github.karlatemp.luckperms.mirai.test
 
 import com.google.auto.service.AutoService
+import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
 import io.github.karlatemp.luckperms.mirai.util.hasPermission
 import net.mamoe.mirai.console.command.AbstractCommand
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
-import net.mamoe.mirai.console.command.CommandPermission
 import net.mamoe.mirai.console.command.CommandSender
-import net.mamoe.mirai.console.plugin.description.PluginDependency
+import net.mamoe.mirai.console.command.ConsoleCommandSender
+import net.mamoe.mirai.console.permission.ExperimentalPermission
+import net.mamoe.mirai.console.permission.PermissionId
+import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
+import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
-import net.mamoe.mirai.console.plugin.jvm.SimpleJvmPluginDescription
 import net.mamoe.mirai.message.data.MessageChain
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 @AutoService(JvmPlugin::class)
 object OpenLPTest : KotlinPlugin(
-    SimpleJvmPluginDescription(
-        "LuckPerms Mirai OpenTest",
-        "1.0.0", // tester un-need version.
-        dependencies = listOf(
-            PluginDependency(
-                name = "LuckPerms"
-            )
-        )
+    JvmPluginDescriptionBuilder(
+        name = "LuckPerms Mirai OpenTest",
+        version = "1.0.0", // tester un-need version.
     )
+        .id("luckperms.luckperms.tester")
+        // .dependsOn("io.github.karlatemp.luckperms-mirai", null as String?, false)
+        .build()
+// dependencies = listOf(
+//            PluginDependency(
+//                name = "LuckPerms"
+//            )
+//        )
 ) {
+    @OptIn(ExperimentalPermission::class)
+    @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
     override fun onEnable() {
         object : AbstractCommand(
             owner = this,
             names = arrayOf("lpp"),
-            permission = CommandPermission.Any,
+            parentPermission = PermissionService.INSTANCE[PermissionId("", "")]!!,
             prefixOptional = true
         ) {
             override val usage: String
                 get() = ""
 
-            suspend fun CommandSender.onCommand(args: MessageChain) {
+            override suspend fun CommandSender.onCommand(args: MessageChain) {
                 // Mirai-Console M4-dev-5
                 val perm = args.contentToString()
                 sendMessage("$perm -> " + (this hasPermission perm))
             }
 
-            override suspend fun CommandSender.onCommand(args: Array<out Any>) {
-                val perm = args.joinToString(
-                    separator = " ", prefix = "", postfix = ""
-                ) {
-                    it.toString()
-                }
-                sendMessage("$perm -> " + (this hasPermission perm))
-            }
-        }.register()
+        }.register(true)
+        invokeCatching {
+            println(io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK)
+        }
+        invokeCatching {
+            LPMiraiPlugin.senderFactory0.wrap(
+                ConsoleCommandSender.INSTANCE
+            ).sendMessage("§cHello, Open test!")
+        }
+    }
+
+
+    @Retention(AnnotationRetention.SOURCE)
+    @DslMarker
+    private annotation class InvokeTest
+
+    @OptIn(ExperimentalContracts::class)
+    @InvokeTest
+    private fun invokeCatching(block: () -> Unit) {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
+        runCatching(block).onFailure { logger.debug(it) }
     }
 }

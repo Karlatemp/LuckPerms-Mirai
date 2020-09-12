@@ -9,7 +9,7 @@
  * https://github.com/Karlatemp/LuckPerms-Mirai/blob/master/LICENSE
  */
 
-@file:OptIn(ExperimentalPermission::class, ConsoleExperimentalAPI::class)
+@file:OptIn(ExperimentalPermission::class, ConsoleExperimentalApi::class)
 @file:Suppress("ClassName")
 
 package io.github.karlatemp.luckperms.mirai.internal
@@ -22,7 +22,7 @@ import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.extensions.PermissionServiceProvider
 import net.mamoe.mirai.console.permission.*
-import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -96,7 +96,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     private val permissions = ConcurrentHashMap<String, LuckPermsPermission>()
 
     init {
-        PermissionServiceProvider.registerExtension(LPMiraiBootstrap, LPPP)
+        // PermissionServiceProvider.registerExtension(LPMiraiBootstrap, LPPP)
         permissions["."] = Magic_NO_PERMISSION_CHECK
         permissions[""] = Magic_NO_PERMISSION_CHECK
         permissions["*"] = ROOT

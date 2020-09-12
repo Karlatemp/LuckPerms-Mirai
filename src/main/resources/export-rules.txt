@@ -1,0 +1,1 @@
+deny io.github.karlatemp.luckperms.mirai.internal.

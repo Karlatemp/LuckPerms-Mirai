@@ -21,7 +21,8 @@ import me.lucko.luckperms.common.plugin.logging.PluginLogger
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
-import net.mamoe.mirai.console.plugin.description.PluginLoadPriority
+import net.mamoe.mirai.console.extension.ScopedComponentStorage
+import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
@@ -48,7 +49,7 @@ object LPMiraiBootstrap : KotlinPlugin(
         "LuckPerms", versionInfo.getNode("pluginVersion").string!!
     )
         .id("io.github.karlatemp.luckperms-mirai")
-        .kind(PluginLoadPriority.BEFORE_EXTENSIONS)
+        // .kind(PluginLoadPriority.BEFORE_EXTENSIONS)
         .author("lucko & Karlatemp")
         .build()
 ), LuckPermsBootstrap {
@@ -141,24 +142,24 @@ object LPMiraiBootstrap : KotlinPlugin(
 
     private var incompatibleVersion: Boolean = false
 
-    override fun onLoad() {
+    @OptIn(ExperimentalPermission::class)
+    override fun ScopedComponentStorage.onLoad() {
         if (checkIncompatibleVersion()) {
-            this.incompatibleVersion = true
+            incompatibleVersion = true
             return
         }
-
+        this.contributePermissionService { LPPermissionService }
         try {
             LPMiraiPlugin.load()
         } finally {
-            this.loadLatch.countDown()
+            loadLatch.countDown()
         }
-    }
-
-    init {
-        LPPermissionService
+        onEnable0()
     }
 
     override fun onEnable() {
+    }
+    fun onEnable0() {
         if (incompatibleVersion) {
             logger.error("----------------------------------------------------------------------")
             logger.error("Your console is not compatible with this build of LuckPerms. :(")
@@ -170,18 +171,18 @@ object LPMiraiBootstrap : KotlinPlugin(
         }
         startupTime0 = Instant.now()
         try {
-            LPMiraiPlugin.enable();
+            LPMiraiPlugin.enable()
         } finally {
-            this.enableLatch.countDown();
+            this.enableLatch.countDown()
         }
     }
 
     override fun onDisable() {
         if (this.incompatibleVersion) {
-            return;
+            return
         }
 
-        LPMiraiPlugin.disable();
+        LPMiraiPlugin.disable()
     }
 
     private fun checkIncompatibleVersion(): Boolean {

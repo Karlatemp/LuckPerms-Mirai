@@ -27,14 +27,14 @@ import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.executeCommand
 import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.Permissible
-import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import java.util.*
 
 @OptIn(ExperimentalPermission::class)
 class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permissible>(
     LPMiraiPlugin
 ) {
-    @OptIn(ConsoleExperimentalAPI::class)
+    @OptIn(ConsoleExperimentalApi::class)
     override fun getName(sender: Permissible?): String {
         if (sender is UserCommandSender) return sender.user.id.toString()
         return Sender.CONSOLE_NAME

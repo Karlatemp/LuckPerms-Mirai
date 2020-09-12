@@ -21,7 +21,7 @@ import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.util.Predicates
 import net.mamoe.mirai.console.command.MemberCommandSender
-import net.mamoe.mirai.console.util.ConsoleExperimentalAPI
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 
 class ViewMe(
     localeManager: LocaleManager,
@@ -35,7 +35,7 @@ class ViewMe(
     CommandPermission.USER_INFO,
     Predicates.alwaysFalse()
 ) {
-    @OptIn(ConsoleExperimentalAPI::class)
+    @OptIn(ConsoleExperimentalApi::class)
     override fun execute(
         plugin: LuckPermsPlugin?,
         sender: Sender,
