@@ -121,7 +121,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         return Sequence { permissions.values.iterator() }
     }
 
-    override fun getGrantedPermissions(permissibleIdentifier: PermissibleIdentifier): Sequence<LuckPermsPermission> {
+    override fun getPermittedPermissions(permitteeId: PermitteeId): Sequence<LuckPermsPermission> {
         return emptySequence()
     }
 
@@ -145,55 +145,55 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         val old = permissions.putIfAbsent(internalId, perm)
         if (old !== null) {
             permissions[internalId] = old
-            throw DuplicatedPermissionRegistrationException(perm, old)
+            throw PermissionRegistryConflictException(perm, old)
         }
         return perm
     }
 
-    fun PermissibleIdentifier.uuid(): UUID {
+    fun PermitteeId.uuid(): UUID {
         return when (val identifier = this) {
-            is AbstractPermissibleIdentifier -> {
+            is AbstractPermitteeId -> {
                 when (identifier) {
-                    is AbstractPermissibleIdentifier.AnyContact -> {
+                    is AbstractPermitteeId.AnyContact -> {
                         UUID_ANY_CONTEXT_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.AnyGroup -> {
+                    is AbstractPermitteeId.AnyGroup -> {
                         UUID_ANY_GROUP_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.AnyFriend -> {
+                    is AbstractPermitteeId.AnyFriend -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.AnyTemp -> {
+                    is AbstractPermitteeId.AnyTemp -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.AnyUser -> {
+                    is AbstractPermitteeId.AnyUser -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.AnyMember -> {
+                    is AbstractPermitteeId.AnyMember -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.AnyMemberFromAnyGroup -> {
+                    is AbstractPermitteeId.AnyMemberFromAnyGroup -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.Console -> {
+                    is AbstractPermitteeId.Console -> {
                         UUID_CONSOLE
                     }
-                    is AbstractPermissibleIdentifier.ExactFriend -> {
+                    is AbstractPermitteeId.ExactFriend -> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.id)
                     }
-                    is AbstractPermissibleIdentifier.ExactGroup -> {
+                    is AbstractPermitteeId.ExactGroup -> {
                         UUID_ANY_GROUP_SELECTOR
                     }
-                    is AbstractPermissibleIdentifier.ExactMember -> {
+                    is AbstractPermitteeId.ExactMember -> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId)
                     }
-                    is AbstractPermissibleIdentifier.ExactTemp -> {
+                    is AbstractPermitteeId.ExactTemp -> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId)
                     }
-                    is AbstractPermissibleIdentifier.ExactUser -> {
+                    is AbstractPermitteeId.ExactUser -> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.id)
                     }
-                    AbstractPermissibleIdentifier.AnyTempFromAnyGroup -> UUID_ANY_MEMBER_SELECTOR
+                    AbstractPermitteeId.AnyTempFromAnyGroup -> UUID_ANY_MEMBER_SELECTOR
                 }
             }
             else -> {
@@ -211,7 +211,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     }
 
     override fun testPermission(
-        permissibleIdentifier: PermissibleIdentifier,
+        permitteeId: PermitteeId,
         permission: LuckPermsPermission
     ): Boolean {
         when (permission) {
@@ -221,14 +221,14 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                 return false
             }
         }
-        if (permissibleIdentifier is AbstractPermissibleIdentifier.Console) {
+        if (permitteeId is AbstractPermitteeId.Console) {
             permission.internalId.logConsole()
             return true
         }
-        val user = permissibleIdentifier.uuid()
+        val user = permitteeId.uuid()
         val usr = LPMiraiPlugin.userManager.getOrMake(user)
         val permissionData = usr.cachedData.getPermissionData(
-            LPMiraiPlugin.contextManager.getQueryOptions(permissibleIdentifier)
+            LPMiraiPlugin.contextManager.getQueryOptions(permitteeId)
         )
         return testPermission(permission, permissionData, permission)
     }
@@ -263,15 +263,14 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         return perm.result().asBoolean()
     }
 
-    override fun deny(permissibleIdentifier: PermissibleIdentifier, permission: LuckPermsPermission) {
-        if (permissibleIdentifier is AbstractPermissibleIdentifier.Console)
+    override fun cancel(permitteeId: PermitteeId, permission: LuckPermsPermission, recursive: Boolean) {
+        if (permitteeId is AbstractPermitteeId.Console)
             return
-        throw UnsupportedOperationException("Only allowed CLI or Direct Deny")
+        throw UnsupportedOperationException("Only allowed CLI or Direct Cancel")
     }
-
-    override fun grant(permissibleIdentifier: PermissibleIdentifier, permission: LuckPermsPermission) {
-        if (permissibleIdentifier is AbstractPermissibleIdentifier.Console)
+    override fun permit(permitteeId: PermitteeId, permission: LuckPermsPermission) {
+        if (permitteeId is AbstractPermitteeId.Console)
             return
-        throw UnsupportedOperationException("Only allowed CLI or Direct Grant")
+        throw UnsupportedOperationException("Only allowed CLI or Direct Permit")
     }
 }

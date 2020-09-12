@@ -20,49 +20,48 @@ import me.lucko.luckperms.common.util.CaffeineFactory
 import net.luckperms.api.context.ImmutableContextSet
 import net.luckperms.api.query.QueryOptions
 import net.mamoe.mirai.console.permission.ExperimentalPermission
-import net.mamoe.mirai.console.permission.Permissible
-import net.mamoe.mirai.console.permission.PermissibleIdentifier
+import net.mamoe.mirai.console.permission.PermitteeId
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPermission::class)
-class MiraiContextManager : ContextManager<PermissibleIdentifier, PermissibleIdentifier>(
-    LPMiraiPlugin, PermissibleIdentifier::class.java, PermissibleIdentifier::class.java
+class MiraiContextManager : ContextManager<PermitteeId, PermitteeId>(
+    LPMiraiPlugin, PermitteeId::class.java, PermitteeId::class.java
 ) {
     private val contextsCache = CaffeineFactory.newBuilder()
         .expireAfterWrite(50, TimeUnit.MILLISECONDS)
-        .build { subject: PermissibleIdentifier ->
+        .build { subject: PermitteeId ->
             calculate(subject)
         }
 
-    override fun getUniqueId(sender: PermissibleIdentifier): UUID {
+    override fun getUniqueId(sender: PermitteeId): UUID {
         return sender.uuid()
     }
 
-    override fun getCacheFor(subject: PermissibleIdentifier): QueryOptionsSupplier {
+    override fun getCacheFor(subject: PermitteeId): QueryOptionsSupplier {
         return InlineQueryOptionsSupplier(subject, this.contextsCache)
     }
 
-    override fun formQueryOptions(subject: PermissibleIdentifier?, contextSet: ImmutableContextSet?): QueryOptions {
+    override fun formQueryOptions(subject: PermitteeId?, contextSet: ImmutableContextSet?): QueryOptions {
         return formQueryOptions(contextSet)
     }
 
-    override fun getContext(subject: PermissibleIdentifier): ImmutableContextSet {
+    override fun getContext(subject: PermitteeId): ImmutableContextSet {
         return getQueryOptions(subject).context()
     }
 
 
-    override fun invalidateCache(subject: PermissibleIdentifier?) {
+    override fun invalidateCache(subject: PermitteeId?) {
         contextsCache.invalidate(subject ?: return)
     }
 
-    override fun getQueryOptions(subject: PermissibleIdentifier): QueryOptions {
+    override fun getQueryOptions(subject: PermitteeId): QueryOptions {
         return contextsCache[subject]!!
     }
 
     private class InlineQueryOptionsSupplier(
-        private val sender: PermissibleIdentifier,
-        private val cache: LoadingCache<PermissibleIdentifier, QueryOptions>
+        private val sender: PermitteeId,
+        private val cache: LoadingCache<PermitteeId, QueryOptions>
     ) : QueryOptionsSupplier {
         override fun getQueryOptions(): QueryOptions = cache[sender]!!
     }

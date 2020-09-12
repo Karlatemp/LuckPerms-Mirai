@@ -167,7 +167,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
                     override suspend fun CommandSender.onCommand(args: MessageChain) {
                         val perm = args.contentToString().trim()
-                        val id = identifier
+                        val id = permitteeId
                         val data = id.uuid()
                         val usr = LPMiraiPlugin.userManager.getOrMake(data)
 

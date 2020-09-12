@@ -13,12 +13,11 @@ package io.github.karlatemp.luckperms.mirai.util
 
 import io.github.karlatemp.luckperms.mirai.MiraiSenderFactory
 import net.luckperms.api.util.Tristate
-//import net.mamoe.mirai.console.command.CommandPermission
 import net.mamoe.mirai.console.permission.ExperimentalPermission
-import net.mamoe.mirai.console.permission.Permissible
+import net.mamoe.mirai.console.permission.Permittee
 
 @OptIn(ExperimentalPermission::class)
-infix fun Permissible.hasPermission(
+infix fun Permittee.hasPermission(
     permission: String
 ): Boolean {
     return MiraiSenderFactory.getPermissionValue0(this, permission) == Tristate.TRUE

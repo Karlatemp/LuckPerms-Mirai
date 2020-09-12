@@ -26,29 +26,29 @@ import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.executeCommand
 import net.mamoe.mirai.console.permission.ExperimentalPermission
-import net.mamoe.mirai.console.permission.Permissible
+import net.mamoe.mirai.console.permission.Permittee
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import java.util.*
 
 @OptIn(ExperimentalPermission::class)
-class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permissible>(
+class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
     LPMiraiPlugin
 ) {
     @OptIn(ConsoleExperimentalApi::class)
-    override fun getName(sender: Permissible?): String {
+    override fun getName(sender: Permittee?): String {
         if (sender is UserCommandSender) return sender.user.id.toString()
         return Sender.CONSOLE_NAME
     }
 
-    override fun getUniqueId(sender: Permissible): UUID {
-        return sender.identifier.uuid()
+    override fun getUniqueId(sender: Permittee): UUID {
+        return sender.permitteeId.uuid()
     }
 
-    override fun sendMessage(sender: Permissible, message: Component) {
+    override fun sendMessage(sender: Permittee, message: Component) {
         sendMessage(sender, TextUtils.toLegacy(message))
     }
 
-    override fun sendMessage(sender: Permissible, message: String) {
+    override fun sendMessage(sender: Permittee, message: String) {
         runBlocking {
             when (sender) {
                 is ConsoleCommandSender -> {
@@ -64,13 +64,13 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permissible>(
     }
 
     override fun getPermissionValue(
-        sender: Permissible,
+        sender: Permittee,
         node: String
     ): Tristate = getPermissionValue0(sender, node)
 
     companion object {
         internal fun getPermissionValue0(
-            sender: Permissible,
+            sender: Permittee,
             node: String
         ): Tristate {
             if (sender is ConsoleCommandSender) {
@@ -81,7 +81,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permissible>(
                 LPMiraiPlugin.permissionRegistry.offer(node)
                 return Tristate.TRUE
             }
-            val id = sender.identifier
+            val id = sender.permitteeId
             val data = id.uuid()
             val usr = LPMiraiPlugin.userManager.getOrMake(data)
 
@@ -96,11 +96,11 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permissible>(
         }
     }
 
-    override fun hasPermission(sender: Permissible, node: String): Boolean {
+    override fun hasPermission(sender: Permittee, node: String): Boolean {
         return getPermissionValue0(sender, node) == Tristate.TRUE
     }
 
-    override fun performCommand(sender: Permissible, command: String) {
+    override fun performCommand(sender: Permittee, command: String) {
         runBlocking {
             val result = (sender as? CommandSender ?: error("Not a command sender."))
                 .executeCommand(CommandManager.commandPrefix + command, true)

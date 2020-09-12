@@ -46,7 +46,7 @@ class ViewMe(
             val real = sender.real
             if (args.isEmpty()) {
                 // dump me
-                val context = LPMiraiPlugin.contextManager.getQueryOptions(real.identifier)
+                val context = LPMiraiPlugin.contextManager.getQueryOptions(real.permitteeId)
                     .context()
                 sender.sendMessage(context.joinToString(", ", "(", ")") {
                     "${it.key}=${it.value}"
@@ -66,7 +66,7 @@ class ViewMe(
                     }
                     val context = LPMiraiPlugin.contextManager.getQueryOptions(
                         @Suppress("INVISIBLE_MEMBER")
-                        MemberCommandSender(member).identifier
+                        MemberCommandSender(member).permitteeId
                     ).context()
                     sender.sendMessage(context.joinToString(", ", "(", ")") {
                         "${it.key}=${it.value}"
