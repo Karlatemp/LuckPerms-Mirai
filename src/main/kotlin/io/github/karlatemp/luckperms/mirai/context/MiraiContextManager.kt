@@ -19,12 +19,10 @@ import me.lucko.luckperms.common.context.QueryOptionsSupplier
 import me.lucko.luckperms.common.util.CaffeineFactory
 import net.luckperms.api.context.ImmutableContextSet
 import net.luckperms.api.query.QueryOptions
-import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.PermitteeId
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalPermission::class)
 class MiraiContextManager : ContextManager<PermitteeId, PermitteeId>(
     LPMiraiPlugin, PermitteeId::class.java, PermitteeId::class.java
 ) {

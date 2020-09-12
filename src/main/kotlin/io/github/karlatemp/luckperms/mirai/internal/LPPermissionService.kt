@@ -9,7 +9,7 @@
  * https://github.com/Karlatemp/LuckPerms-Mirai/blob/master/LICENSE
  */
 
-@file:OptIn(ExperimentalPermission::class, ConsoleExperimentalApi::class)
+@file:OptIn(ConsoleExperimentalApi::class)
 @file:Suppress("ClassName")
 
 package io.github.karlatemp.luckperms.mirai.internal
@@ -91,7 +91,6 @@ internal object Magic_NO_REGISTER_CHECK : LuckPermsPermission(
     }
 }
 
-@OptIn(ExperimentalPermission::class)
 internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     private val permissions = ConcurrentHashMap<String, LuckPermsPermission>()
 
@@ -104,11 +103,10 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     }
 
 
-    @ExperimentalPermission
     override val permissionType: KClass<LuckPermsPermission> = LuckPermsPermission::class
 
     private fun PermissionId.lp(): String {
-        val id = this.id
+        val id = this.name
         val namespace = this.namespace
         if (id.isEmpty()) return namespace
         if (namespace == "*" && id == "*") return "*"

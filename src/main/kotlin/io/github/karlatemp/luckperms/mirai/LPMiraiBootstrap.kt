@@ -22,7 +22,6 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.extension.PluginComponentStorage
-import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
@@ -141,7 +140,6 @@ object LPMiraiBootstrap : KotlinPlugin(
     }
 
     private var incompatibleVersion: Boolean = false
-    @OptIn(ExperimentalPermission::class)
     override fun PluginComponentStorage.onLoad() {
         if (checkIncompatibleVersion()) {
             incompatibleVersion = true

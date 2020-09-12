@@ -15,13 +15,11 @@ import net.luckperms.api.context.ContextCalculator
 import net.luckperms.api.context.ContextConsumer
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.permission.AbstractPermitteeId
-import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.PermitteeId
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
 import net.mamoe.mirai.getGroupOrNull
 
-@OptIn(ExperimentalPermission::class)
 object MiraiCalculator : ContextCalculator<PermitteeId> {
     private fun scanMember(group: Long, member: Long): Member? {
         Bot.botInstancesSequence.forEach { bot ->

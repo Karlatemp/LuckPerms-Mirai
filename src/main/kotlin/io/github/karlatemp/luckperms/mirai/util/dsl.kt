@@ -13,10 +13,8 @@ package io.github.karlatemp.luckperms.mirai.util
 
 import io.github.karlatemp.luckperms.mirai.MiraiSenderFactory
 import net.luckperms.api.util.Tristate
-import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.Permittee
 
-@OptIn(ExperimentalPermission::class)
 infix fun Permittee.hasPermission(
     permission: String
 ): Boolean {

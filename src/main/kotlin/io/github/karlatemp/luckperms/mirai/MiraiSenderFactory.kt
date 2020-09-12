@@ -25,12 +25,10 @@ import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.executeCommand
-import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.Permittee
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import java.util.*
 
-@OptIn(ExperimentalPermission::class)
 class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
     LPMiraiPlugin
 ) {

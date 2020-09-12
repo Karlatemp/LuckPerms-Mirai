@@ -54,7 +54,6 @@ import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.ConsoleCommandSender
 import net.mamoe.mirai.console.extensions.PostStartupExtension
-import net.mamoe.mirai.console.permission.ExperimentalPermission
 import net.mamoe.mirai.console.permission.Permission
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.message.data.*
@@ -122,8 +121,6 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     override val usage: String
                         get() = "/lp"
 
-                    @OptIn(ExperimentalPermission::class)
-                    @ExperimentalPermission
                     override val permission: Permission
                         get() = Magic_NO_PERMISSION_CHECK
 
@@ -182,7 +179,6 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 })
 
                 if (BuiltInCommands.PermissionCommand.unregister()) {
-                    @OptIn(ExperimentalPermission::class)
                     object : AbstractCommand(
                         owner = LPMiraiBootstrap,
                         names = arrayOf("permission", "权限", "perm"),
@@ -222,7 +218,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     }
 
     private val console by lazy {
-        senderFactory0.wrap(ConsoleCommandSender.INSTANCE)
+        senderFactory0.wrap(ConsoleCommandSender)
     }
 
     override fun getConsoleSender(): Sender = console
