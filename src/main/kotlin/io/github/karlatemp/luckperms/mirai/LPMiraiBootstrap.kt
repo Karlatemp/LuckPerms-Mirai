@@ -40,12 +40,14 @@ private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().
 }
     .build()
     .load()
-
+private val version0 by lazy {
+    versionInfo.getNode("pluginVersion").string!!
+}
 @AutoService(JvmPlugin::class)
 @Suppress("unused")
 object LPMiraiBootstrap : KotlinPlugin(
     JvmPluginDescriptionBuilder(
-        "LuckPerms", versionInfo.getNode("pluginVersion").string!!
+        "LuckPerms", version0
     )
         .id("io.github.karlatemp.luckperms-mirai")
         // .kind(PluginLoadPriority.BEFORE_EXTENSIONS)
@@ -71,7 +73,7 @@ object LPMiraiBootstrap : KotlinPlugin(
 
     override fun getEnableLatch(): CountDownLatch = enableLatch0
 
-    override fun getVersion(): String = this.description.version.toString()
+    override fun getVersion(): String = version0
 
     private lateinit var startupTime0: Instant
     override fun getStartupTime(): Instant = startupTime0

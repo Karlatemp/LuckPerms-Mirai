@@ -19,6 +19,7 @@ import io.github.karlatemp.luckperms.mirai.commands.ViewMe
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
+import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK
 import io.github.karlatemp.luckperms.mirai.util.hasPermission
@@ -55,6 +56,7 @@ import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.ConsoleCommandSender
 import net.mamoe.mirai.console.extensions.PostStartupExtension
 import net.mamoe.mirai.console.permission.Permission
+import net.mamoe.mirai.console.permission.PermissionId
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.message.data.*
 import java.io.IOException
@@ -111,13 +113,20 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 val commands: MutableList<net.mamoe.mirai.console.command.Command> = ArrayList()
                 commands.add(object : AbstractCommand(
                     owner = LPMiraiBootstrap,
-                    names = arrayOf("luckperms", "lp"),
+                    primaryName = "luckperms",
+                    secondaryNames = arrayOf("lp", "llp", "lplp"),
                     description = "LuckPerms",
                     // permission = CommandPermission.Any,
                     prefixOptional = false
                 ) {
-                    override val names: Array<out String> =
-                        arrayOf("luckperms", "lp", "luckperms:lp", "luckperms:luckperms")
+                    init {
+                        @Suppress("UNCHECKED_CAST")
+                        val sec = secondaryNames as Array<String>
+                        sec[0] = "lp"
+                        sec[1] = "luckperms:lp"
+                        sec[2] = "luckperms:luckperms"
+                    }
+
                     override val usage: String
                         get() = "/lp"
 
@@ -154,13 +163,17 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 })
                 commands.add(object : AbstractCommand(
                     owner = LPMiraiBootstrap,
-                    names = arrayOf("lpcheck"),
+                    primaryName = "lpcheck",
+                    secondaryNames = arrayOf(),
                     description = "LuckPerms - Checker",
                     // permission = CommandPermission.Any,
                     prefixOptional = false
                 ) {
                     override val usage: String
                         get() = ""
+                    override val permission: Permission = LPPermissionService.register(
+                        PermissionId("luckperms", "lpcheck"), "", Magic_NO_PERMISSION_CHECK
+                    )
 
                     override suspend fun CommandSender.onCommand(args: MessageChain) {
                         val perm = args.contentToString().trim()
@@ -181,12 +194,13 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 if (BuiltInCommands.PermissionCommand.unregister()) {
                     object : AbstractCommand(
                         owner = LPMiraiBootstrap,
-                        names = arrayOf("permission", "权限", "perm"),
-                        prefixOptional = false,
-                        description = ""
+                        primaryName = BuiltInCommands.PermissionCommand.primaryName,
+                        secondaryNames = BuiltInCommands.PermissionCommand.secondaryNames,
+                        prefixOptional = BuiltInCommands.PermissionCommand.prefixOptional,
+                        description = BuiltInCommands.PermissionCommand.description
                     ) {
                         override val usage: String
-                            get() = ""
+                            get() = BuiltInCommands.PermissionCommand.usage
 
                         override suspend fun CommandSender.onCommand(args: MessageChain) {
                             sendMessage(

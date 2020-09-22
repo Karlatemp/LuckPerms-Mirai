@@ -17,8 +17,8 @@ def lpVersion = ({
 })().toString()
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.3.0'
-def ver = lpMiraiVer + '-' + lpVersion.replace('-', '+')
+def lpMiraiVer = '1.4.0'
+def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {
     group 'io.github.karlatemp.mirai.luckperms'
@@ -49,7 +49,7 @@ dependencies {
     compile "me.lucko.luckperms:common" // LuckPerms
 
     compileOnly("net.mamoe:mirai-core:1.2.3")
-    compileOnly("net.mamoe:mirai-console:1.0-M4")
+    compileOnly("net.mamoe:mirai-console:1.0-RC-dev-28")
 //
 //    ({
 //        def console = rootProject.file("../Mirai-console/backend/mirai-console/build/libs")
