@@ -16,11 +16,12 @@ import io.github.karlatemp.luckperms.mirai.util.ChatColor
 import io.github.karlatemp.luckperms.mirai.util.colorTranslator
 import kotlinx.coroutines.runBlocking
 import me.lucko.luckperms.common.calculator.result.TristateResult
+import me.lucko.luckperms.common.locale.TranslationManager
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.sender.SenderFactory
-import me.lucko.luckperms.common.util.TextUtils
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
-import net.kyori.text.Component
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.*
@@ -43,10 +44,10 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
     }
 
     override fun sendMessage(sender: Permittee, message: Component) {
-        sendMessage(sender, TextUtils.toLegacy(message))
+        sendMessage(sender, LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)))
     }
 
-    override fun sendMessage(sender: Permittee, message: String) {
+    public fun sendMessage(sender: Permittee, message: String) {
         runBlocking {
             when (sender) {
                 is ConsoleCommandSender -> {

@@ -33,6 +33,7 @@ import java.nio.file.Path
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import kotlin.reflect.full.memberProperties
 
 private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().setSource {
     MethodHandles.lookup().lookupClass().classLoader.getResourceAsStream("metainfo.conf")!!
@@ -43,6 +44,7 @@ private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().
 private val version0 by lazy {
     versionInfo.getNode("pluginVersion").string!!
 }
+
 @AutoService(JvmPlugin::class)
 @Suppress("unused")
 object LPMiraiBootstrap : KotlinPlugin(
@@ -86,8 +88,16 @@ object LPMiraiBootstrap : KotlinPlugin(
         return "Mirai"
     }
 
+    private val consoleVersion by lazy {
+        kotlin.runCatching {
+            return@lazy MiraiConsole.version.toString()
+        }
+        MiraiConsole::class.memberProperties.first { it.name == "version" }
+            .get(MiraiConsole.INSTANCE).toString()
+    }
+
     private val serverVersion0 by lazy {
-        "MiraiConsole/" + MiraiConsole.version.toString() +
+        "MiraiConsole/" + consoleVersion +
                 " LuckPerms-Mirai/" + versionInfo.getNode("plugin").string +
                 " LuckPerms-Core/" + versionInfo.getNode("luckperms").string
     }
@@ -158,6 +168,7 @@ object LPMiraiBootstrap : KotlinPlugin(
 
     override fun onEnable() {
     }
+
     fun onEnable0() {
         if (incompatibleVersion) {
             logger.error("----------------------------------------------------------------------")

@@ -17,7 +17,7 @@ def lpVersion = ({
 })().toString()
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.4.0'
+def lpMiraiVer = '1.5.0'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {

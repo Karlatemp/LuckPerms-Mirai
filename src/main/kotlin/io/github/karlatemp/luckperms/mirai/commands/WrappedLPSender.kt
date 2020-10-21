@@ -13,8 +13,7 @@ package io.github.karlatemp.luckperms.mirai.commands
 
 import me.lucko.luckperms.common.command.access.CommandPermission
 import me.lucko.luckperms.common.sender.Sender
-import me.lucko.luckperms.common.util.TextUtils
-import net.kyori.text.Component
+import net.kyori.adventure.text.Component
 import net.mamoe.mirai.console.command.CommandSender
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -30,10 +29,12 @@ class WrappedLPSender(
 
     override fun getUniqueId() = delegate.uniqueId
 
-    private val cachedMessages = ArrayList<String>(16)
+    private val cachedMessages = ArrayList<Component>(16)
     private val cache = AtomicBoolean(true)
     private val writingLock = AtomicBoolean()
-    override fun sendMessage(message: String) {
+
+    override fun sendMessage(message: Component?) {
+        message ?: return
         @Suppress("ControlFlowWithEmptyBody")
         while (writingLock.compareAndSet(false, true)) {
         }
@@ -44,10 +45,6 @@ class WrappedLPSender(
             writingLock.set(false)
             delegate.sendMessage(message)
         }
-    }
-
-    override fun sendMessage(message: Component?) {
-        sendMessage(TextUtils.toLegacy(message ?: return))
     }
 
     override fun getPermissionValue(permission: String?) = delegate.getPermissionValue(permission)
@@ -70,7 +67,7 @@ class WrappedLPSender(
             val msg = cachedMessages
             writingLock.set(false)
             if (msg.isNotEmpty()) {
-                delegate.sendMessage(msg.joinToString("\n"))
+                delegate.sendMessage(Component.join({ Component.text('\n') }, msg))
             }
         } else {
             writingLock.set(false)

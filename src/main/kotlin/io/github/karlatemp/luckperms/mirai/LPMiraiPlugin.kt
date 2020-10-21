@@ -14,8 +14,6 @@
 package io.github.karlatemp.luckperms.mirai
 
 
-import com.google.common.collect.ImmutableMap
-import io.github.karlatemp.luckperms.mirai.commands.ViewMe
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
@@ -26,7 +24,6 @@ import io.github.karlatemp.luckperms.mirai.util.hasPermission
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
-import me.lucko.luckperms.common.command.abstraction.Command
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter
 import me.lucko.luckperms.common.dependencies.Dependency
 import me.lucko.luckperms.common.event.AbstractEventBus
@@ -48,16 +45,17 @@ import me.lucko.luckperms.common.tasks.ExpireTemporaryTask
 import me.lucko.luckperms.common.util.MoreFiles
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.query.QueryOptions
-import net.mamoe.mirai.console.command.AbstractCommand
-import net.mamoe.mirai.console.command.BuiltInCommands
+import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
-import net.mamoe.mirai.console.command.CommandSender
-import net.mamoe.mirai.console.command.ConsoleCommandSender
+import net.mamoe.mirai.console.command.CommandSender.Companion.asMemberCommandSender
 import net.mamoe.mirai.console.extensions.PostStartupExtension
 import net.mamoe.mirai.console.permission.Permission
 import net.mamoe.mirai.console.permission.PermissionId
+import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.contact.Friend
+import net.mamoe.mirai.getFriendOrNull
 import net.mamoe.mirai.message.data.*
 import java.io.IOException
 import java.nio.file.Files
@@ -66,9 +64,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashMap
 
 object LPMiraiPlugin : AbstractLuckPermsPlugin() {
+    private val commandCaller = ThreadLocal<CommandSender>()
 
     override fun getBootstrap(): LPMiraiBootstrap = LPMiraiBootstrap
 
@@ -90,23 +88,6 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     override fun registerCommands() {
         val cm = CommandManager(this)
         commandManager0 = cm
-        // inject commandF
-        @Suppress("UNCHECKED_CAST")
-        CommandManager::class.java.getDeclaredField("mainCommands").apply {
-            isAccessible = true
-            val old = this[cm] as Map<String, Command<*>>
-            val copied = LinkedHashMap(old)
-            copied["view"] = ViewMe(localeManager)
-            this[cm] = ImmutableMap.copyOf(copied)
-            // Map<String, Command<?>>
-        }
-//        @OptIn(ConsoleExperimentalApi::class)
-//        class PostCall : PostStartupExtension {
-//            override fun invoke() {
-//                commands.forEach { it.register(override = true) }
-//                BuiltInCommands.PermissionCommand.unregister()
-//            }
-//        }
         @OptIn(ConsoleExperimentalApi::class)
         LPMiraiBootstrap.componentStorage.contribute(PostStartupExtension.ExtensionPoint) {
             PostStartupExtension {
@@ -154,7 +135,12 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                                 this@onCommand
                             ), this@onCommand
                         )
-                        cm.executeCommand(sender, "lp", args)
+                        cm.executeCommand(sender, "lp", object : MutableList<String> by args {
+                            override fun isEmpty(): Boolean {
+                                commandCaller.set(this@onCommand)
+                                return args.isEmpty()
+                            }
+                        })
                             .thenAccept {
                                 sender.flush()
                             }
@@ -223,12 +209,43 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     override fun getConnectionListener(): AbstractConnectionListener = connectionListener0
 
     override fun getQueryOptionsForUser(user: User): Optional<QueryOptions> {
+        commandCaller.get()?.takeIf { it.isUser() }?.let { contract ->
+            val uid = user.uniqueId
+            if (uid.mostSignificantBits == MAGIC_UUID_HIGH_BITS) {
+                val qid = uid.leastSignificantBits
+                when (val subject = contract.subject) {
+                    is net.mamoe.mirai.contact.Group -> {
+                        subject.getOrNull(qid)?.let { member ->
+                            return Optional.of(contextManager0.getQueryOptions(member.permitteeId))
+                        }
+                    }
+                    is Friend -> {
+                        subject.bot.getFriendOrNull(qid)?.let { friend ->
+                            return Optional.of(contextManager0.getQueryOptions(friend.permitteeId))
+                        }
+                    }
+                }
+            }
+        }
         return Optional.empty()
 
     }
 
     override fun getOnlineSenders(): Stream<Sender> {
-        return Stream.of(console)
+        val consoleX = Stream.of(console)
+        // MAGIC_UUID_HIGH_BITS
+        commandCaller.get()?.takeIf { it.isUser() }?.let { contract ->
+            val subject = contract.subject!!
+            if (subject is net.mamoe.mirai.contact.Group) {
+                return Stream.concat(consoleX,
+                    Stream.concat(subject.members.stream(), Stream.of(subject.botAsMember)).map {
+                        val mcs = it.asMemberCommandSender()
+                        WrappedLPSender(senderFactory0.wrap(mcs), mcs)
+                    }
+                )
+            }
+        }
+        return consoleX
     }
 
     private val console by lazy {
