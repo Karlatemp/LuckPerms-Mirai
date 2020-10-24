@@ -8,11 +8,11 @@ LuckPerms, 经典的权限系统, 已经接入Mirai-Console Permission Service.
 - Permission本身
 - Permission的父Permission
 
-对于 MC Default PermissionSystem. 他会有以下行为
+对于 Mirai-Console Built-In PermissionSystem. 他会有以下行为
 
-- 如果可以拥有权限的对象(`Permissible`) 拥有
+- 如果可以拥有权限的对象(`Permittee`) 拥有
  `Permission` 或者 `Permission的任何一级parent`,
-  那么代表此 `Permissible` 拥有这个权限
+  那么代表此 `Permittee` 拥有这个权限
 
 ---
 
@@ -21,7 +21,7 @@ LuckPerms, 经典的权限系统, 已经接入Mirai-Console Permission Service.
 - 如果权限节点是已设置的, 返回该权限节点的状态
 - 如果当前节点已经是 Root 权限节点, 中断, 判断为没有权限
 - 重新检查该权限节点的parent
-- 特别的, 对于 `Console`, `Console` 拥有全部权限
+- 特别的, `Console` 拥有全部权限
 
 LuckPerms 采用拦截式的权限判断.
 - 设: 当前需要判断的权限对象拥有的权限为 `*=true`, `deny=false`
@@ -33,6 +33,7 @@ LuckPerms 采用拦截式的权限判断.
 LuckPerms Mirai 提供了一些特别的权限节点(权限ID), `namespace:id` 在对应代码中为 `PermissionId(namespace, id)`
 - 对于 `*:*`, LuckPerms-Mirai会直接识别成 `*`, 代表 ROOT
 - 对于 `:`(`PermissionId("","")`), LuckPerms-Mirai 会直接返回true, 代表没有权限检查
+  - `<lp>.%`, `<lp>.<void>` 与 `:` 拥有相同效果
 - 对于 `namespace:`(`PermissionId(namespace, "")`),
   LuckPerms-Mirai 会识别成 `namespace` 而不是 `namespace.`
 - PermissionService#register
@@ -42,5 +43,4 @@ LuckPerms Mirai 提供了一些特别的权限节点(权限ID), `namespace:id` �
 
 ## 如何使用
 - 正常接入Mirai-Console Permission System即可
-- 请不要在 `namespace` 中使用 `.` 号
 

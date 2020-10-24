@@ -100,6 +100,8 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         permissions[""] = Magic_NO_PERMISSION_CHECK
         permissions["*"] = ROOT
         permissions["<lp>.#"] = Magic_NO_REGISTER_CHECK
+        permissions["<lp>.%"] = Magic_NO_PERMISSION_CHECK
+        permissions["<lp>.<void>"] = Magic_NO_PERMISSION_CHECK
     }
 
 
