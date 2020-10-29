@@ -1,3 +1,5 @@
+import java.nio.file.Files
+
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
@@ -17,7 +19,7 @@ def lpVersion = ({
 })().toString()
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.5.0'
+def lpMiraiVer = '1.5.1'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {
@@ -49,7 +51,7 @@ dependencies {
     compile "me.lucko.luckperms:common" // LuckPerms
 
     compileOnly("net.mamoe:mirai-core:1.2.3")
-    compileOnly("net.mamoe:mirai-console:1.0-RC-dev-28")
+    compileOnly("net.mamoe:mirai-console:1.0-RC")
 //
 //    ({
 //        def console = rootProject.file("../Mirai-console/backend/mirai-console/build/libs")
@@ -101,3 +103,17 @@ shadowJar {
     relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
 }
 
+
+task releaseCiJar() {
+    dependsOn(shadowJar)
+    doFirst {
+        def file = shadowJar.archiveFile.get().asFile
+        def target = rootProject.file("build/ci")
+        target.mkdirs()
+        def targetFile = new File(target, "luckperms-mirai.jar")
+        targetFile.delete()
+        file.withInputStream { stream ->
+            Files.copy(stream, targetFile.toPath())
+        }
+    }
+}

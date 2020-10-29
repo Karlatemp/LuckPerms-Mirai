@@ -49,6 +49,7 @@ import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.command.CommandSender.Companion.asMemberCommandSender
+import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.extensions.PostStartupExtension
 import net.mamoe.mirai.console.permission.Permission
 import net.mamoe.mirai.console.permission.PermissionId
@@ -65,6 +66,7 @@ import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
 
+@OptIn(ConsoleExperimentalApi::class)
 object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     private val commandCaller = ThreadLocal<CommandSender>()
 
@@ -85,6 +87,8 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
     private lateinit var commandManager0: CommandManager
     override fun getCommandManager(): CommandManager = commandManager0
+
+    @OptIn(ExperimentalCommandDescriptors::class)
     override fun registerCommands() {
         val cm = CommandManager(this)
         commandManager0 = cm
@@ -92,7 +96,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
         LPMiraiBootstrap.componentStorage.contribute(PostStartupExtension.ExtensionPoint) {
             PostStartupExtension {
                 val commands: MutableList<net.mamoe.mirai.console.command.Command> = ArrayList()
-                commands.add(object : AbstractCommand(
+                commands.add(object : RawCommand(
                     owner = LPMiraiBootstrap,
                     primaryName = "luckperms",
                     secondaryNames = arrayOf("lp", "llp", "lplp"),
@@ -147,13 +151,12 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     }
 
                 })
-                commands.add(object : AbstractCommand(
+                commands.add(object : RawCommand(
                     owner = LPMiraiBootstrap,
                     primaryName = "lpcheck",
                     secondaryNames = arrayOf(),
                     description = "LuckPerms - Checker",
                     // permission = CommandPermission.Any,
-                    prefixOptional = false
                 ) {
                     override val usage: String
                         get() = ""
@@ -178,7 +181,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 })
 
                 if (BuiltInCommands.PermissionCommand.unregister()) {
-                    object : AbstractCommand(
+                    object : RawCommand(
                         owner = LPMiraiBootstrap,
                         primaryName = BuiltInCommands.PermissionCommand.primaryName,
                         secondaryNames = BuiltInCommands.PermissionCommand.secondaryNames,
@@ -268,7 +271,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
         if (!Files.exists(path)) {
             try {
                 MoreFiles.createDirectoriesIfNotExists(this.bootstrap.configDirectory)
-                javaClass.classLoader.getResourceAsStream("luckperms.conf").use { `is` ->
+                javaClass.classLoader.getResourceAsStream("luckperms.conf")!!.use { `is` ->
                     Files.copy(
                         `is`,
                         path

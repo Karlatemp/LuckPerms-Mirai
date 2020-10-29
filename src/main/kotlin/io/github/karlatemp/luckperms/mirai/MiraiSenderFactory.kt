@@ -26,6 +26,7 @@ import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.executeCommand
+import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.permission.Permittee
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import java.util.*
@@ -99,6 +100,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
         return getPermissionValue0(sender, node) == Tristate.TRUE
     }
 
+    @OptIn(ExperimentalCommandDescriptors::class,ConsoleExperimentalApi::class)
     override fun performCommand(sender: Permittee, command: String) {
         runBlocking {
             val result = (sender as? CommandSender ?: error("Not a command sender."))
@@ -109,11 +111,14 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
                 is CommandExecuteResult.ExecutionFailed -> {
                     sender.sendMessage("Exception in executing command.")
                 }
-                is CommandExecuteResult.CommandNotFound -> {
+                is CommandExecuteResult.UnresolvedCall -> {
                     sender.sendMessage("Command not found.")
                 }
                 is CommandExecuteResult.PermissionDenied -> {
                     sender.sendMessage("Permission denied...")
+                }
+                is CommandExecuteResult.IllegalArgument -> {
+                    sender.sendMessage(result.exception.message ?: "[Execute] Illegal Argument")
                 }
             }
         }
