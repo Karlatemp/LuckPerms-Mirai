@@ -16,6 +16,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
+        run: ./gradlew clean build
+      - name: Shadow jar
         run: ./gradlew releaseCiJar
       - name: Upload Release Asset
         id: upload-release-asset
