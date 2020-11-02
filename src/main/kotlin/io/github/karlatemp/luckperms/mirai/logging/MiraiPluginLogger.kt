@@ -25,7 +25,15 @@ class MiraiPluginLogger(
         logger.warning(s)
     }
 
+    override fun warn(s: String?, t: Throwable?) {
+        logger.warning(s, t)
+    }
+
     override fun severe(s: String?) {
         logger.error(s)
+    }
+
+    override fun severe(s: String?, t: Throwable?) {
+        logger.error(s, t)
     }
 }

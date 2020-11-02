@@ -67,9 +67,9 @@ object OpenLPTest : KotlinPlugin(
             println(io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK)
         }
         invokeCatching {
-            LPMiraiPlugin.senderFactory0.wrap(
-                ConsoleCommandSender.INSTANCE
-            ).sendMessage("§cHello, Open test!")
+//            LPMiraiPlugin.senderFactory0.wrap(
+//                ConsoleCommandSender.INSTANCE
+//            ).sendMessage("§cHello, Open test!")
         }
     }
 
