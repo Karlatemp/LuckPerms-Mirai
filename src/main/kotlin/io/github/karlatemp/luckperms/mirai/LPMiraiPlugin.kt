@@ -297,7 +297,9 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     override fun provideCalculatorFactory(): CalculatorFactory = MiraiCalculatorFactory
 
     override fun getGlobalDependencies(): MutableSet<Dependency> {
-        return EnumSet.noneOf(Dependency::class.java)
+        val dependencies = super.getGlobalDependencies()
+        dependencies.add(Dependency.ADVENTURE_PLATFORM)
+        return dependencies
     }
 
     private lateinit var contextManager0: MiraiContextManager

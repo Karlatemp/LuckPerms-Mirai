@@ -18,8 +18,25 @@ def lpVersion = ({
     return resu
 })().toString()
 
+def getGitVersion = { String path ->
+    def proc = new ProcessBuilder("git", "rev-parse", "HEAD")
+            .directory(new File(path))
+            .start()
+    proc.waitFor()
+    def line = proc.inputStream.withReader { it.readLine() }
+    return line
+}
+
+def gitVersion = getGitVersion(".")
+def gitLpVersion = getGitVersion("LuckPerms")
+
+def now = System.currentTimeMillis()
+
+println("GitVersion = $gitVersion")
+println("LpGVersion = $gitLpVersion")
+
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.5.1'
+def lpMiraiVer = '1.5.2'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {
@@ -76,7 +93,10 @@ processResources {
         expand([
                 'pluginVersion': ver,
                 'lpVersion'    : lpVersion,
-                'lpmVersion'   : lpMiraiVer
+                'lpmVersion'   : lpMiraiVer,
+                'gitLuckPerms' : gitLpVersion,
+                'gitPlugin'    : gitVersion,
+                'buildTime'    : now
         ])
         include 'plugin.yml'
         include 'metainfo.conf'
@@ -85,7 +105,7 @@ processResources {
 
 shadowJar {
     exclude 'module-info.class'
-    relocate 'net.kyori.text', 'me.lucko.luckperms.lib.text'
+    relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
     relocate 'okio', 'me.lucko.luckperms.lib.okio'
@@ -100,7 +120,27 @@ shadowJar {
     relocate 'org.bson', 'me.lucko.luckperms.lib.bson'
     relocate 'redis.clients.jedis', 'me.lucko.luckperms.lib.jedis'
     relocate 'org.apache.commons.pool2', 'me.lucko.luckperms.lib.commonspool2'
-    relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+    // relocate 'ninja.leaping.configurate', 'me.lucko.luckperms.lib.configurate'
+
+    def excludes = [
+            'com.zaxxer:HikariCP',
+            'org.slf4j',
+            'me.lucko:adventure-api',
+            'net.bytebuddy',
+            'net.kyori',
+            'org.spongepowered:configurate-yaml',
+            'org.yaml:snakeyaml',
+            'redis.clients',
+            'com.github.ben-manes.caffeine',
+            'com.squareup.okhttp3',
+            'com.squareup.okio',
+            'me.lucko.configurate',
+            'org.mongodb',
+            'org.apache.commons'
+    ]
+    dependencyFilter.exclude {
+        excludes.contains(it.moduleGroup + ":" + it.moduleName) || excludes.contains(it.moduleGroup)
+    }
 }
 
 
@@ -115,5 +155,23 @@ task releaseCiJar() {
         file.withInputStream { stream ->
             Files.copy(stream, targetFile.toPath())
         }
+    }
+}
+
+task ts47() {
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
+                             '-Xjvm-default=enable']
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
+                             '-Xjvm-default=enable']
     }
 }

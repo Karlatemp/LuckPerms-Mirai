@@ -31,6 +31,7 @@ import java.io.InputStream
 import java.lang.invoke.MethodHandles
 import java.nio.file.Path
 import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import kotlin.reflect.full.memberProperties
@@ -43,6 +44,15 @@ private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().
     .load()
 private val version0 by lazy {
     versionInfo.getNode("pluginVersion").string!!
+}
+private val buildTime by lazy {
+    Date(versionInfo.getNode("buildTime").long)
+}
+private val gitVersionLuckPerms by lazy {
+    versionInfo.getNode("gitversion-luckperms").string
+}
+private val gitVersionLuckPermsMirai by lazy {
+    versionInfo.getNode("gitversion-plugin").string
 }
 
 @AutoService(JvmPlugin::class)
@@ -97,9 +107,19 @@ object LPMiraiBootstrap : KotlinPlugin(
     }
 
     private val serverVersion0 by lazy {
-        "MiraiConsole/" + consoleVersion +
-                " LuckPerms-Mirai/" + versionInfo.getNode("plugin").string +
-                " LuckPerms-Core/" + versionInfo.getNode("luckperms").string
+        buildString {
+            append("MiraiConsole/").append(consoleVersion)
+            append(" LuckPerms-Mirai/").append(versionInfo.getNode("plugin").string)
+            append(" LuckPerms-Core/").append(versionInfo.getNode("luckperms").string)
+            append("\n              ")
+            append("BuildTime: ").append(buildTime.toInstant().atZone(ZoneId.systemDefault()))
+            append("\n              ")
+            append("LuckPerms-Core / ").append(gitVersionLuckPerms)
+            append("\n              ")
+            append("LuckPerms-Mirai/ ").append(gitVersionLuckPermsMirai)
+            append("\n              ")
+            append("LuckPerms-Mirai provided by Karlatemp. LuckPerms provided by Luck.")
+        }
     }
 
     override fun getServerVersion(): String {
