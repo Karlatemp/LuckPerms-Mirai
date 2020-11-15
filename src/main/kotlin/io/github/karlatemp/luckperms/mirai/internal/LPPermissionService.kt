@@ -58,7 +58,7 @@ internal object TempPermissionInitPlaceholder : Permission {
     }
 }
 
-private val AnyID = PermissionId("", "")
+private val AnyID = PermissionId("<lp>", "%")
 
 internal object Magic_NO_PERMISSION_CHECK : LuckPermsPermission(
     ROOT, "", AnyID, ".", null

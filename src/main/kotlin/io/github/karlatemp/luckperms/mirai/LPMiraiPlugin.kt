@@ -189,7 +189,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                         description = BuiltInCommands.PermissionCommand.description
                     ) {
                         override val usage: String
-                            get() = BuiltInCommands.PermissionCommand.usage
+                            get() = "/permission"
 
                         override suspend fun CommandSender.onCommand(args: MessageChain) {
                             sendMessage(

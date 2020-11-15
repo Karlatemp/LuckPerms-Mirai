@@ -32,8 +32,8 @@ LuckPerms 采用拦截式的权限判断.
 ## 特别权限节点
 LuckPerms Mirai 提供了一些特别的权限节点(权限ID), `namespace:id` 在对应代码中为 `PermissionId(namespace, id)`
 - 对于 `*:*`, LuckPerms-Mirai会直接识别成 `*`, 代表 ROOT
-- 对于 `:`(`PermissionId("","")`), LuckPerms-Mirai 会直接返回true, 代表没有权限检查
-  - `<lp>.%`, `<lp>.<void>` 与 `:` 拥有相同效果
+- 对于 `<lp>:%`, LuckPerms-Mirai 会直接返回true, 代表没有权限检查
+  - `<lp>.<void>` 与 `<lp>.%` 拥有相同效果
 - 对于 `namespace:`(`PermissionId(namespace, "")`),
   LuckPerms-Mirai 会识别成 `namespace` 而不是 `namespace.`
 - PermissionService#register

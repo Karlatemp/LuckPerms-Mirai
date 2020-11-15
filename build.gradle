@@ -36,7 +36,7 @@ println("GitVersion = $gitVersion")
 println("LpGVersion = $gitLpVersion")
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.5.2'
+def lpMiraiVer = '1.5.3'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {
