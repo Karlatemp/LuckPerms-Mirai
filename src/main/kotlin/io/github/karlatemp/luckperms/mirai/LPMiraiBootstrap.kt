@@ -108,7 +108,7 @@ object LPMiraiBootstrap : KotlinPlugin(
 
     private val serverVersion0 by lazy {
         buildString {
-            append("MiraiConsole/").append(consoleVersion)
+            append("     MiraiConsole/").append(consoleVersion)
             append(" LuckPerms-Mirai/").append(versionInfo.getNode("plugin").string)
             append(" LuckPerms-Core/").append(versionInfo.getNode("luckperms").string)
             append("\n              ")
@@ -121,9 +121,9 @@ object LPMiraiBootstrap : KotlinPlugin(
             append("LuckPerms-Mirai provided by Karlatemp. LuckPerms provided by Luck.")
         }
     }
-
+    override fun versionOnCommandRender():String = serverVersion0
     override fun getServerVersion(): String {
-        return serverVersion0
+        return "MiraiConsole/$consoleVersion"
     }
 
     override fun getDataDirectory(): Path = dataFolderPath

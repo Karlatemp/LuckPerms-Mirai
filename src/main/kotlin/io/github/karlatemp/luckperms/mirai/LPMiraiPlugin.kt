@@ -24,6 +24,7 @@ import io.github.karlatemp.luckperms.mirai.util.hasPermission
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
+import me.lucko.luckperms.common.command.CommandResult
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter
 import me.lucko.luckperms.common.dependencies.Dependency
 import me.lucko.luckperms.common.event.AbstractEventBus
@@ -90,7 +91,19 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
     @OptIn(ExperimentalCommandDescriptors::class)
     override fun registerCommands() {
-        val cm = CommandManager(this)
+        val cm = object : CommandManager(this) {
+            override fun preExecute(sender: Sender?, label: String?, arguments: MutableList<String>?): CommandResult? {
+                commandCaller.set((sender as WrappedLPSender).real)
+                return null
+            }
+
+            override fun shouldRenderVersion(sender: Sender?, hasPermAny: Boolean, isFirstTime: Boolean): Boolean {
+                if ((sender as WrappedLPSender).real is ConsoleCommandSender) return true
+                if (hasPermAny) return true
+                return false
+            }
+        }
+
         commandManager0 = cm
         @OptIn(ConsoleExperimentalApi::class)
         LPMiraiBootstrap.componentStorage.contribute(PostStartupExtension.ExtensionPoint) {
@@ -139,12 +152,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                                 this@onCommand
                             ), this@onCommand
                         )
-                        cm.executeCommand(sender, "lp", object : MutableList<String> by args {
-                            override fun isEmpty(): Boolean {
-                                commandCaller.set(this@onCommand)
-                                return args.isEmpty()
-                            }
-                        })
+                        cm.executeCommand(sender, "lp", args)
                             .thenAccept {
                                 sender.flush()
                             }

@@ -145,6 +145,7 @@ shadowJar {
 
 
 task releaseCiJar() {
+    group = "build"
     dependsOn(shadowJar)
     doFirst {
         def file = shadowJar.archiveFile.get().asFile
@@ -175,3 +176,39 @@ compileTestKotlin {
                              '-Xjvm-default=enable']
     }
 }
+
+
+task genPatch() {
+    group = "patchs"
+    doLast {
+        def code = new ProcessBuilder(
+                "git", "diff", "--output", "../patchs.patch"
+        )
+                .directory(project.file("LuckPerms"))
+                .inheritIO()
+                .start()
+                .waitFor()
+        if (code != 0) {
+            throw new IllegalStateException("Code: $code")
+        }
+    }
+}
+
+task applyPatch() {
+    group = "patchs"
+    doLast {
+        def proc = new ProcessBuilder(
+                "git", "apply", "--reject", "../patchs.patch"
+        )
+                .directory(project.file("LuckPerms"))
+                .inheritIO()
+                .start()
+        proc.in.eachLine { println it }
+        proc.err.eachLine { System.err.println it }
+        def code = proc.waitFor()
+        if (code != 0) {
+            throw new IllegalStateException("Code: $code")
+        }
+    }
+}
+

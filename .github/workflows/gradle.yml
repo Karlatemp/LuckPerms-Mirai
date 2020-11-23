@@ -25,4 +25,4 @@ jobs:
     - name: Init git submodule
       run: git submodule update --init --recursive
     - name: Build with Gradle
-      run: ./gradlew :build
+      run: ./gradlew :applyPatch :build

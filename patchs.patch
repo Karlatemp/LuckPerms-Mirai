@@ -1,0 +1,166 @@
+diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
+index 5d9493d6..8e8fbfe9 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
++++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
+@@ -26,7 +26,6 @@
+ package me.lucko.luckperms.common.command;
+ 
+ import com.google.common.collect.ImmutableList;
+-
+ import me.lucko.luckperms.common.command.abstraction.Command;
+ import me.lucko.luckperms.common.command.abstraction.CommandException;
+ import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
+@@ -39,20 +38,7 @@ import me.lucko.luckperms.common.commands.group.GroupParentCommand;
+ import me.lucko.luckperms.common.commands.group.ListGroups;
+ import me.lucko.luckperms.common.commands.log.LogParentCommand;
+ import me.lucko.luckperms.common.commands.migration.MigrationParentCommand;
+-import me.lucko.luckperms.common.commands.misc.ApplyEditsCommand;
+-import me.lucko.luckperms.common.commands.misc.BulkUpdateCommand;
+-import me.lucko.luckperms.common.commands.misc.CheckCommand;
+-import me.lucko.luckperms.common.commands.misc.EditorCommand;
+-import me.lucko.luckperms.common.commands.misc.ExportCommand;
+-import me.lucko.luckperms.common.commands.misc.ImportCommand;
+-import me.lucko.luckperms.common.commands.misc.InfoCommand;
+-import me.lucko.luckperms.common.commands.misc.NetworkSyncCommand;
+-import me.lucko.luckperms.common.commands.misc.ReloadConfigCommand;
+-import me.lucko.luckperms.common.commands.misc.SearchCommand;
+-import me.lucko.luckperms.common.commands.misc.SyncCommand;
+-import me.lucko.luckperms.common.commands.misc.TranslationsCommand;
+-import me.lucko.luckperms.common.commands.misc.TreeCommand;
+-import me.lucko.luckperms.common.commands.misc.VerboseCommand;
++import me.lucko.luckperms.common.commands.misc.*;
+ import me.lucko.luckperms.common.commands.track.CreateTrack;
+ import me.lucko.luckperms.common.commands.track.DeleteTrack;
+ import me.lucko.luckperms.common.commands.track.ListTracks;
+@@ -64,7 +50,6 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
+ import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
+ import me.lucko.luckperms.common.sender.Sender;
+ import me.lucko.luckperms.common.util.ImmutableCollectors;
+-
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.event.ClickEvent;
+ import net.kyori.adventure.text.format.NamedTextColor;
+@@ -78,6 +63,7 @@ import java.util.concurrent.ExecutorService;
+ import java.util.concurrent.Executors;
+ import java.util.function.Function;
+ import java.util.stream.Collectors;
++import java.util.stream.Stream;
+ 
+ /**
+  * Root command manager for the '/luckperms' command.
+@@ -96,7 +82,7 @@ public class CommandManager {
+     public CommandManager(LuckPermsPlugin plugin) {
+         this.plugin = plugin;
+         this.tabCompletions = new TabCompletions(plugin);
+-        this.mainCommands = ImmutableList.<Command<?>>builder()
++        this.mainCommands = Stream.concat(ImmutableList.<Command<?>>builder()
+                 .add(new UserParentCommand())
+                 .add(new GroupParentCommand())
+                 .add(new TrackParentCommand())
+@@ -124,10 +110,14 @@ public class CommandManager {
+                 .add(new DeleteTrack())
+                 .add(new ListTracks())
+                 .build()
+-                .stream()
++                .stream(),injectedCommands())
+                 .collect(ImmutableCollectors.toMap(c -> c.getName().toLowerCase(), Function.identity()));
+     }
+ 
++    protected Stream<Command<?>> injectedCommands() {
++        return Stream.empty();
++    }
++
+     public LuckPermsPlugin getPlugin() {
+         return this.plugin;
+     }
+@@ -151,11 +141,32 @@ public class CommandManager {
+         return this.mainCommands.values().stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender));
+     }
+ 
++    protected CommandResult preExecute(Sender sender, String label, List<String> arguments) {
++        return null;
++    }
++    protected boolean shouldRenderVersion(Sender sender, boolean hasPermAny, boolean isFirstTime) {
++        return true;
++    }
++
+     private CommandResult execute(Sender sender, String label, List<String> arguments) {
++
++        {
++            CommandResult result = preExecute(sender, label, arguments);
++            if (result != null) return result;
++        }
++
+         applyConvenienceAliases(arguments, true);
+ 
+         // Handle no arguments
+         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
++            boolean hasPermAny = hasPermissionForAny(sender);
++            boolean isFirstTime = false;
++            if (!hasPermAny) {
++                Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
++                isFirstTime = groups.size() <= 1 && groups.stream().allMatch(g -> g.normalData().isEmpty());
++            }
++
++            if (shouldRenderVersion(sender, hasPermAny, isFirstTime))
+             sender.sendMessage(Message.prefixed(Component.text()
+                     .color(NamedTextColor.DARK_GREEN)
+                     .append(Component.text("Running "))
+@@ -165,13 +176,12 @@ public class CommandManager {
+                     .append(Message.FULL_STOP)
+             ));
+ 
+-            if (hasPermissionForAny(sender)) {
++            if (hasPermAny) {
+                 Message.VIEW_AVAILABLE_COMMANDS_PROMPT.send(sender, label);
+                 return CommandResult.SUCCESS;
+             }
+ 
+-            Collection<? extends Group> groups = this.plugin.getGroupManager().getAll().values();
+-            if (groups.size() <= 1 && groups.stream().allMatch(g -> g.normalData().isEmpty())) {
++            if (isFirstTime) {
+                 Message.FIRST_TIME_SETUP.send(sender, label, sender.getName());
+             } else {
+                 Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
+@@ -236,14 +246,6 @@ public class CommandManager {
+     }
+ 
+     private void sendCommandUsage(Sender sender, String label) {
+-        sender.sendMessage(Message.prefixed(Component.text()
+-                .color(NamedTextColor.DARK_GREEN)
+-                .append(Component.text("Running "))
+-                .append(Component.text(AbstractLuckPermsPlugin.getPluginName(), NamedTextColor.AQUA))
+-                .append(Component.space())
+-                .append(Component.text("v" + this.plugin.getBootstrap().getVersion(), NamedTextColor.AQUA))
+-                .append(Message.FULL_STOP)
+-        ));
+ 
+         this.mainCommands.values().stream()
+                 .filter(Command::shouldDisplay)
+diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
+index 662bc428..74a13db9 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
++++ b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
+@@ -1368,8 +1368,7 @@ public interface Message {
+                     .append(text(':'))),
+             prefixed(text()
+                     .color(WHITE)
+-                    .append(text("     "))
+-                    .append(text(plugin.getBootstrap().getServerVersion()))),
++                    .append(text(plugin.getBootstrap().versionOnCommandRender()))),
+             prefixed(text()
+                     .color(AQUA)
+                     .append(text("-  ", WHITE))
+diff --git a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
+index 4d18a152..74e1ac4d 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
++++ b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
+@@ -227,4 +227,8 @@ public interface LuckPermsBootstrap {
+         return null;
+     }
+ 
++
++    default String versionOnCommandRender() {
++        return null;
++    }
+ }
