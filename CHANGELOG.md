@@ -1,3 +1,14 @@
+# 1.6.0
+
+- Fix console 1.0.1 cannot load LuckPerms
+- Only load `api` and `command` modules (in LuckPerms) for dev
+- Fix permission checking issues...
+- module `public-api`
+- Command `/lp lpmdebug` for debugging
+
+# 1.5.3
+Remove invalid `PermissionId("", "")`
+
 # 1.5.1
 Mirai console 1.0-RC
 
