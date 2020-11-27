@@ -2,7 +2,7 @@
  * Copyright (c) 2018-2020 Karlatemp. All rights reserved.
  * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
  *
- * LuckPerms-Mirai/LuckPerms-Mirai_main/LPPermissionService.kt
+ * LuckPerms-Mirai/LuckPerms-Mirai.main/LPPermissionService.kt
  *
  * Use of this source code is governed by the GNU AFFERO GENERAL PUBLIC LICENSE version 3 license that can be found via the following link.
  *
@@ -15,6 +15,8 @@
 package io.github.karlatemp.luckperms.mirai.internal
 
 import io.github.karlatemp.luckperms.mirai.*
+import io.github.karlatemp.luckperms.mirai.logging.DebugKit
+import io.github.karlatemp.luckperms.mirai.openapi.CustomPermitteeId
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache
 import me.lucko.luckperms.common.calculator.result.TristateResult
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
@@ -179,23 +181,32 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                         UUID_CONSOLE
                     }
                     is AbstractPermitteeId.ExactFriend -> {
-                        UUID(MAGIC_UUID_HIGH_BITS, identifier.id)
+                        UUID(MAGIC_UUID_HIGH_BITS, identifier.id.also {
+                            MiraiConnectionListener.instance.recUsr(it)
+                        })
                     }
                     is AbstractPermitteeId.ExactGroup -> {
                         UUID_ANY_GROUP_SELECTOR
                     }
                     is AbstractPermitteeId.ExactMember -> {
-                        UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId)
+                        UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId.also {
+                            MiraiConnectionListener.instance.recUsr(it)
+                        })
                     }
                     is AbstractPermitteeId.ExactTemp -> {
-                        UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId)
+                        UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId.also {
+                            MiraiConnectionListener.instance.recUsr(it)
+                        })
                     }
                     is AbstractPermitteeId.ExactUser -> {
-                        UUID(MAGIC_UUID_HIGH_BITS, identifier.id)
+                        UUID(MAGIC_UUID_HIGH_BITS, identifier.id.also {
+                            MiraiConnectionListener.instance.recUsr(it)
+                        })
                     }
                     AbstractPermitteeId.AnyTempFromAnyGroup -> UUID_ANY_MEMBER_SELECTOR
                 }
             }
+            is CustomPermitteeId -> identifier.uuid
             else -> {
                 TODO()
             }
@@ -214,6 +225,8 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         permitteeId: PermitteeId,
         permission: LuckPermsPermission
     ): Boolean {
+        DebugKit.log { "Testing permission ${permission.internalId} with $permitteeId" }
+
         when (permission) {
             Magic_NO_PERMISSION_CHECK -> return true
             Magic_NO_REGISTER_CHECK -> {
@@ -226,10 +239,15 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             return true
         }
         val user = permitteeId.uuid()
-        val usr = LPMiraiPlugin.userManager.getOrMake(user)
+        val usr = LPMiraiPlugin.userManager.getIfLoaded(user) ?: kotlin.run {
+            LPMiraiBootstrap.logger.error("WARMING: User $user{lnum=${user.leastSignificantBits}} not loaded. Please report to https://github.com/Karlatemp/LuckPerms-Mirai")
+            return false
+        }
+
         val permissionData = usr.cachedData.getPermissionData(
             LPMiraiPlugin.contextManager.getQueryOptions(permitteeId)
         )
+        DebugKit.log { "UUID $user with lnum ${user.leastSignificantBits}, permissions = ${permissionData.permissionMap}" }
         return testPermission(permission, permissionData, permission)
     }
 
@@ -254,6 +272,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         }
         val perm =
             permissionData.checkPermission(permission.internalId, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK)
+        DebugKit.log { "Testing ${permission.internalId} -> ${perm.result()}" }
         if (perm.result() == Tristate.UNDEFINED) {
             val pp = permission.parentPermission
             if (pp != null) {
@@ -268,6 +287,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             return
         throw UnsupportedOperationException("Only allowed CLI or Direct Cancel")
     }
+
     override fun permit(permitteeId: PermitteeId, permission: LuckPermsPermission) {
         if (permitteeId is AbstractPermitteeId.Console)
             return

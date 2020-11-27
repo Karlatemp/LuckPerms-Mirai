@@ -2,7 +2,7 @@
  * Copyright (c) 2018-2020 Karlatemp. All rights reserved.
  * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
  *
- * LuckPerms-Mirai/LuckPerms-Mirai/build.gradle
+ * LuckPerms-Mirai/LuckPerms-Mirai.test-plugin/build.gradle
  *
  * Use of this source code is governed by the GNU AFFERO GENERAL PUBLIC LICENSE version 3 license that can be found via the following link.
  *
@@ -23,15 +23,8 @@ dependencies {
 
     compile "me.lucko.luckperms:common" // LuckPerms
     compileOnly("net.mamoe:mirai-core:1.2.2")
-    ({
-        def console = rootProject.file("../Mirai-console/backend/mirai-console/build/libs")
-        if (console.isDirectory() && console.listFiles().length > 0) {
-            compileOnly(fileTree(console))
-            compileOnly("com.vdurmont:semver4j:3.1.0")
-        } else {
-            compileOnly("net.mamoe:mirai-console:1.0-M4-dev-3") // 后端
-        }
-    })()
+    compileOnly("net.mamoe:mirai-console:1.0-RC")
+
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     compileOnly rootProject
     def autoService = '1.0-rc7'

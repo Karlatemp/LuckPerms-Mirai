@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2018-2020 Karlatemp. All rights reserved.
+ * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
+ *
+ * LuckPerms-Mirai/LuckPerms-Mirai/build.gradle
+ *
+ * Use of this source code is governed by the GNU AFFERO GENERAL PUBLIC LICENSE version 3 license that can be found via the following link.
+ *
+ * https://github.com/Karlatemp/LuckPerms-Mirai/blob/master/LICENSE
+ */
+
 import java.nio.file.Files
 
 plugins {
@@ -36,26 +47,35 @@ println("GitVersion = $gitVersion")
 println("LpGVersion = $gitLpVersion")
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '1.5.3'
+def lpMiraiVer = '1.6.0'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {
     group 'io.github.karlatemp.mirai.luckperms'
-    version ver
+    if (name == 'public-api') {
+        version lpMiraiVer
+    } else {
+        version ver
+    }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         jcenter()
     }
-
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = '1.8'
-            freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
-                                 '-Xjvm-default=enable']
+    afterEvaluate {
+        compileKotlin {
+            kotlinOptions {
+                jvmTarget = '1.8'
+                freeCompilerArgs += [
+                        '-Xopt-in=kotlin.RequiresOptIn',
+                        '-Xopt-in=io.github.karlatemp.luckperms.mirai.openapi.anno.InternalLpApi',
+                        '-Xopt-in=io.github.karlatemp.luckperms.mirai.openapi.anno.ExperimentalLpApi',
+                        '-Xjvm-default=enable'
+                ]
+            }
         }
     }
-
 }
 
 dependencies {
@@ -66,6 +86,7 @@ dependencies {
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
 
     compile "me.lucko.luckperms:common" // LuckPerms
+    compile project(':public-api')
 
     compileOnly("net.mamoe:mirai-core:1.2.3")
     compileOnly("net.mamoe:mirai-console:1.0-RC")

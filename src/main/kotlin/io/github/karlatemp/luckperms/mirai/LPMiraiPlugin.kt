@@ -14,17 +14,19 @@
 package io.github.karlatemp.luckperms.mirai
 
 
+import io.github.karlatemp.luckperms.mirai.commands.SwitchDebugCommand
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK
-import io.github.karlatemp.luckperms.mirai.util.hasPermission
+import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
 import me.lucko.luckperms.common.command.CommandResult
+import me.lucko.luckperms.common.command.abstraction.Command
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter
 import me.lucko.luckperms.common.dependencies.Dependency
 import me.lucko.luckperms.common.event.AbstractEventBus
@@ -95,6 +97,12 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
             override fun preExecute(sender: Sender?, label: String?, arguments: MutableList<String>?): CommandResult? {
                 commandCaller.set((sender as WrappedLPSender).real)
                 return null
+            }
+
+            override fun injectedCommands(): Stream<Command<*>> {
+                return Stream.of(
+                    SwitchDebugCommand,
+                )
             }
 
             override fun shouldRenderVersion(sender: Sender?, hasPermAny: Boolean, isFirstTime: Boolean): Boolean {
@@ -180,7 +188,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
                         val options = LPMiraiPlugin.contextManager.getQueryOptions(id)
                         sendMessage(
-                            "$perm -> " + hasPermission(perm) + '\n' +
+                            "$perm -> " + OpenApiImpl.run { hasPerm(perm) } + '\n' +
                                     options.context().toString() + '\n' +
                                     usr.cachedData.getPermissionData(options).permissionMap.toString()
                         )

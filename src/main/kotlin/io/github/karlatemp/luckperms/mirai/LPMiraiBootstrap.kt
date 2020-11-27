@@ -13,7 +13,9 @@ package io.github.karlatemp.luckperms.mirai
 
 import com.google.auto.service.AutoService
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
+import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import io.github.karlatemp.luckperms.mirai.logging.MiraiPluginLogger
+import io.github.karlatemp.luckperms.mirai.openapi.internal.BackendImpl
 import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader
 import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap
@@ -42,18 +44,25 @@ private val versionInfo: ConfigurationNode = HoconConfigurationLoader.builder().
 }
     .build()
     .load()
-private val version0 by lazy {
+internal val version0 by lazy {
     versionInfo.getNode("pluginVersion").string!!
 }
-private val buildTime by lazy {
+internal val buildTime by lazy {
     Date(versionInfo.getNode("buildTime").long)
 }
-private val gitVersionLuckPerms by lazy {
-    versionInfo.getNode("gitversion-luckperms").string
+internal val gitVersionLuckPerms by lazy {
+    versionInfo.getNode("gitversion-luckperms").string!!
 }
-private val gitVersionLuckPermsMirai by lazy {
-    versionInfo.getNode("gitversion-plugin").string
+internal val gitVersionLuckPermsMirai by lazy {
+    versionInfo.getNode("gitversion-plugin").string!!
 }
+internal val luckPermsMiraiVersion by lazy{
+    versionInfo.getNode("plugin").string!!
+}
+internal val luckPermVersion by lazy{
+    versionInfo.getNode("luckperms").string!!
+}
+
 
 @AutoService(JvmPlugin::class)
 @Suppress("unused")
@@ -109,8 +118,8 @@ object LPMiraiBootstrap : KotlinPlugin(
     private val serverVersion0 by lazy {
         buildString {
             append("     MiraiConsole/").append(consoleVersion)
-            append(" LuckPerms-Mirai/").append(versionInfo.getNode("plugin").string)
-            append(" LuckPerms-Core/").append(versionInfo.getNode("luckperms").string)
+            append(" LuckPerms-Mirai/").append(luckPermsMiraiVersion)
+            append(" LuckPerms-Core/").append(luckPermVersion)
             append("\n              ")
             append("BuildTime: ").append(buildTime.toInstant().atZone(ZoneId.systemDefault()))
             append("\n              ")
@@ -204,6 +213,7 @@ object LPMiraiBootstrap : KotlinPlugin(
         }
         startupTime0 = Instant.now()
         try {
+            BackendImpl.INSTANCE = OpenApiImpl
             LPMiraiPlugin.enable()
         } finally {
             this.enableLatch.countDown()

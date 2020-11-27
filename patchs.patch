@@ -137,6 +137,30 @@ index 5d9493d6..8e8fbfe9 100644
  
          this.mainCommands.values().stream()
                  .filter(Command::shouldDisplay)
+diff --git a/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java b/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java
+index 8bcec25b..9b0a5148 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java
++++ b/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java
+@@ -31,6 +31,7 @@ import me.lucko.luckperms.common.sender.Sender;
+  * An enumeration of the permissions required to execute built in LuckPerms commands.
+  */
+ public enum CommandPermission {
++    LPM_DEBUG("lpmdebug", Type.NONE),
+ 
+     SYNC("sync", Type.NONE),
+     INFO("info", Type.NONE),
+diff --git a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
+index 532095af..e7cc597d 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
++++ b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
+@@ -37,6 +37,7 @@ import java.util.List;
+  */
+ @SuppressWarnings("SpellCheckingInspection")
+ public enum CommandSpec {
++    LPM_DEBUG("/%s lpmdebug"),
+ 
+     USER("/%s user <user>"),
+     GROUP("/%s group <group>"),
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 index c2027ee6..d944244c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
