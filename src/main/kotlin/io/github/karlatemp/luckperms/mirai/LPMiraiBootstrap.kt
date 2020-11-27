@@ -172,7 +172,10 @@ object LPMiraiBootstrap : KotlinPlugin(
     }
 
     private var incompatibleVersion: Boolean = false
+
+    internal lateinit var pcs: PluginComponentStorage
     override fun PluginComponentStorage.onLoad() {
+        pcs = this
         if (checkIncompatibleVersion()) {
             incompatibleVersion = true
             return

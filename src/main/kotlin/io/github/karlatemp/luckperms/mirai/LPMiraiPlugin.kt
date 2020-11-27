@@ -106,7 +106,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
         commandManager0 = cm
         @OptIn(ConsoleExperimentalApi::class)
-        LPMiraiBootstrap.componentStorage.contribute(PostStartupExtension.ExtensionPoint) {
+        LPMiraiBootstrap.pcs.contribute(PostStartupExtension.ExtensionPoint) {
             PostStartupExtension {
                 val commands: MutableList<net.mamoe.mirai.console.command.Command> = ArrayList()
                 commands.add(object : RawCommand(
