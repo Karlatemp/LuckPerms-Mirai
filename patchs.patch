@@ -138,7 +138,7 @@ index 5d9493d6..8e8fbfe9 100644
          this.mainCommands.values().stream()
                  .filter(Command::shouldDisplay)
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-index 662bc428..74a13db9 100644
+index c2027ee6..d944244c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 @@ -1368,8 +1368,7 @@ public interface Message {
@@ -164,3 +164,18 @@ index 4d18a152..74e1ac4d 100644
 +        return null;
 +    }
  }
+diff --git a/settings.gradle b/settings.gradle
+index e5de4f93..38f73fd7 100644
+--- a/settings.gradle
++++ b/settings.gradle
+@@ -2,10 +2,4 @@ rootProject.name = 'luckperms'
+ include (
+         'api',
+         'common',
+-        'bukkit',
+-        'bukkit-legacy',
+-        'bungee',
+-        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
+-        'nukkit',
+-        'velocity'
+ )
