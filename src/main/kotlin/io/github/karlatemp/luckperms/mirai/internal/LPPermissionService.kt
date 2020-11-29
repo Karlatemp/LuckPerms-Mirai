@@ -149,6 +149,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             permissions[internalId] = old
             throw PermissionRegistryConflictException(perm, old)
         }
+        LPMiraiPlugin.permissionRegistry.offer(internalId)
         return perm
     }
 
@@ -270,6 +271,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             }
             return false
         }
+        LPMiraiPlugin.permissionRegistry.offer(permission.internalId)
         val perm =
             permissionData.checkPermission(permission.internalId, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK)
         DebugKit.log { "Testing ${permission.internalId} -> ${perm.result()}" }

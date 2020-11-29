@@ -110,6 +110,12 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 if (hasPermAny) return true
                 return false
             }
+
+            override fun shouldRendNoPermsForSubCommands(sender: Sender?): Boolean {
+                val real = (sender as WrappedLPSender).real
+                if (real is ConsoleCommandSender) return true // ???
+                return real !is MemberCommandSender
+            }
         }
 
         commandManager0 = cm
@@ -155,11 +161,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     }
 
                     fun CommandSender.onCommand(args: MutableList<String>) {
-                        val sender = WrappedLPSender(
-                            senderFactory0.wrap(
-                                this@onCommand
-                            ), this@onCommand
-                        )
+                        val sender = WrappedLPSender.wrap(this@onCommand)
                         cm.executeCommand(sender, "lp", args)
                             .thenAccept {
                                 sender.flush()
@@ -259,7 +261,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 return Stream.concat(consoleX,
                     Stream.concat(subject.members.stream(), Stream.of(subject.botAsMember)).map {
                         val mcs = it.asMemberCommandSender()
-                        WrappedLPSender(senderFactory0.wrap(mcs), mcs)
+                        WrappedLPSender.wrap(mcs)
                     }
                 )
             }

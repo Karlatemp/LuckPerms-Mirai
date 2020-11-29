@@ -11,23 +11,47 @@
 
 package io.github.karlatemp.luckperms.mirai.commands
 
+import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
 import me.lucko.luckperms.common.command.access.CommandPermission
+import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
 import net.kyori.adventure.text.Component
+import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.CommandSender
+import net.mamoe.mirai.console.command.ConsoleCommandSender
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.ArrayList
 
-class WrappedLPSender(
+open class WrappedLPSender(
     val delegate: Sender,
     val real: CommandSender
 ) : Sender {
-    override fun getPlugin() = delegate.plugin
+    object WrappedConsole : WrappedLPSender(
+        ConsoleSender,
+        ConsoleCommandSender
+    ) {
+        override fun flush() {}
+        override fun isConsole(): Boolean = true
+        override fun sendMessage(message: Component?) {
+            ConsoleSender.sendMessage(message ?: return)
+        }
+    }
 
-    override fun getName() = delegate.name
+    companion object {
+        fun wrap(sender: CommandSender): WrappedLPSender = if (sender is ConsoleCommandSender) {
+            WrappedConsole
+        } else WrappedLPSender(LPMiraiPlugin.senderFactory0.wrap(sender), sender)
 
-    override fun getNameWithLocation() = delegate.nameWithLocation
+    }
 
-    override fun getUniqueId() = delegate.uniqueId
+    override fun getPlugin(): LuckPermsPlugin = delegate.plugin
+
+    override fun getName(): String = delegate.name
+
+    override fun getNameWithLocation(): String = delegate.nameWithLocation
+
+    override fun getUniqueId(): UUID = delegate.uniqueId
 
     private val cachedMessages = ArrayList<Component>(16)
     private val cache = AtomicBoolean(true)
@@ -47,7 +71,7 @@ class WrappedLPSender(
         }
     }
 
-    override fun getPermissionValue(permission: String?) = delegate.getPermissionValue(permission)
+    override fun getPermissionValue(permission: String?): Tristate = delegate.getPermissionValue(permission)
 
     override fun hasPermission(permission: String?) = delegate.hasPermission(permission)
 
@@ -58,7 +82,8 @@ class WrappedLPSender(
     override fun isConsole() = delegate.isConsole
 
     override fun isValid() = delegate.isValid
-    fun flush() {
+
+    override fun flush() {
         @Suppress("ControlFlowWithEmptyBody")
         while (writingLock.compareAndSet(false, true)) {
         }

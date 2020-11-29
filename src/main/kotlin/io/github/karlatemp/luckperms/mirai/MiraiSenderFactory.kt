@@ -44,7 +44,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
         return sender.permitteeId.uuid()
     }
 
-    override fun sendMessage(sender: Permittee, message: Component) {
+    public override fun sendMessage(sender: Permittee, message: Component) {
         sendMessage(sender, LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)))
     }
 
@@ -73,12 +73,12 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
             sender: Permittee,
             node: String
         ): Tristate {
+            LPMiraiPlugin.permissionRegistry.offer(node)
             if (sender is ConsoleCommandSender) {
                 LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
                     PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, "internal/console",
                     QueryOptions.nonContextual(), node, TristateResult.of(Tristate.TRUE)
                 )
-                LPMiraiPlugin.permissionRegistry.offer(node)
                 return Tristate.TRUE
             }
             val id = sender.permitteeId
@@ -101,7 +101,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
     }
 
     @OptIn(ExperimentalCommandDescriptors::class,ConsoleExperimentalApi::class)
-    override fun performCommand(sender: Permittee, command: String) {
+    public override fun performCommand(sender: Permittee, command: String) {
         runBlocking {
             val result = (sender as? CommandSender ?: error("Not a command sender."))
                 .executeCommand(CommandManager.commandPrefix + command, true)

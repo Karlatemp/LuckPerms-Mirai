@@ -1,5 +1,5 @@
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-index 5d9493d6..8e8fbfe9 100644
+index 5d9493d6..a44cf6ab 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 @@ -26,7 +26,6 @@
@@ -73,7 +73,7 @@ index 5d9493d6..8e8fbfe9 100644
      public LuckPermsPlugin getPlugin() {
          return this.plugin;
      }
-@@ -151,11 +141,32 @@ public class CommandManager {
+@@ -151,11 +141,35 @@ public class CommandManager {
          return this.mainCommands.values().stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender));
      }
  
@@ -81,6 +81,9 @@ index 5d9493d6..8e8fbfe9 100644
 +        return null;
 +    }
 +    protected boolean shouldRenderVersion(Sender sender, boolean hasPermAny, boolean isFirstTime) {
++        return true;
++    }
++    protected boolean shouldRendNoPermsForSubCommands(Sender sender) {
 +        return true;
 +    }
 +
@@ -106,7 +109,7 @@ index 5d9493d6..8e8fbfe9 100644
              sender.sendMessage(Message.prefixed(Component.text()
                      .color(NamedTextColor.DARK_GREEN)
                      .append(Component.text("Running "))
-@@ -165,13 +176,12 @@ public class CommandManager {
+@@ -165,15 +179,15 @@ public class CommandManager {
                      .append(Message.FULL_STOP)
              ));
  
@@ -121,8 +124,11 @@ index 5d9493d6..8e8fbfe9 100644
 +            if (isFirstTime) {
                  Message.FIRST_TIME_SETUP.send(sender, label, sender.getName());
              } else {
++                if (shouldRendNoPermsForSubCommands(sender))
                  Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
-@@ -236,14 +246,6 @@ public class CommandManager {
+             }
+             return CommandResult.NO_PERMISSION;
+@@ -236,14 +250,6 @@ public class CommandManager {
      }
  
      private void sendCommandUsage(Sender sender, String label) {
@@ -161,6 +167,18 @@ index 532095af..e7cc597d 100644
  
      USER("/%s user <user>"),
      GROUP("/%s group <group>"),
+diff --git a/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java b/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
+index 982093d3..755a3efb 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
++++ b/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
+@@ -171,6 +171,7 @@ public class EditorCommand extends SingleCommand {
+         }
+ 
+         Message.EDITOR_START.send(sender);
++        sender.flush();
+ 
+         return WebEditorRequest.generate(holders, tracks, sender, label, plugin)
+                 .createSession(plugin, sender);
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 index c2027ee6..d944244c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
@@ -187,6 +205,21 @@ index 4d18a152..74e1ac4d 100644
 +    default String versionOnCommandRender() {
 +        return null;
 +    }
+ }
+diff --git a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
+index a9cd81d1..730b4b12 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
++++ b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
+@@ -162,4 +162,10 @@ public interface Sender {
+         return true;
+     }
+ 
++    /**
++     * Flush cached message to real sender
++     *
++     * For LuckPerms-Mirai
++     */
++    default void flush() {}
  }
 diff --git a/settings.gradle b/settings.gradle
 index e5de4f93..38f73fd7 100644

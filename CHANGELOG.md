@@ -1,3 +1,8 @@
+# 1.6.1
+
+- 修复 `/lp editor` 没有显示全部已注册权限的问题
+- 现在直接执行 `/lp` 时没有权限的用户不会提示信息(仅群聊)
+
 # 1.6.0
 
 - Fix console 1.0.1 cannot load LuckPerms
