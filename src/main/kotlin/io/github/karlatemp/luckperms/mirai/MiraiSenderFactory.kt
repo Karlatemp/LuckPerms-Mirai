@@ -25,7 +25,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.command.*
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.executeCommand
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.permission.Permittee
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -100,7 +99,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
         return getPermissionValue0(sender, node) == Tristate.TRUE
     }
 
-    @OptIn(ExperimentalCommandDescriptors::class,ConsoleExperimentalApi::class)
+    @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     public override fun performCommand(sender: Permittee, command: String) {
         runBlocking {
             val result = (sender as? CommandSender ?: error("Not a command sender."))
@@ -109,16 +108,26 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
                 is CommandExecuteResult.Success -> {
                 }
                 is CommandExecuteResult.ExecutionFailed -> {
-                    sender.sendMessage("Exception in executing command.")
-                }
-                is CommandExecuteResult.UnresolvedCall -> {
-                    sender.sendMessage("Command not found.")
+                    sender.sendMessage("Exception in executing command. More detail in console.")
+                    LPMiraiBootstrap.logger.warning("Exception in executing `$command`", result.exception)
                 }
                 is CommandExecuteResult.PermissionDenied -> {
                     sender.sendMessage("Permission denied...")
                 }
                 is CommandExecuteResult.IllegalArgument -> {
                     sender.sendMessage(result.exception.message ?: "[Execute] Illegal Argument")
+                }
+                is CommandExecuteResult.Intercepted -> {
+                    sender.sendMessage("Command execution intercepted.")
+                }
+                is CommandExecuteResult.UnmatchedSignature -> {
+                    sender.sendMessage("No any command signature match.")
+                }
+                is CommandExecuteResult.UnresolvedCommand -> {
+                    sender.sendMessage("Command not found.")
+                }
+                is CommandExecuteResult.Failure -> {
+                    sender.sendMessage("Unknown failure reason: $result")
                 }
             }
         }
