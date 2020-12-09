@@ -95,6 +95,7 @@ object LPMiraiBootstrap : KotlinPlugin(
     override fun getEnableLatch(): CountDownLatch = enableLatch0
 
     override fun getVersion(): String = version0
+    override fun getVersionLuckPerms(): String = luckPermVersion
 
     private lateinit var startupTime0: Instant
     override fun getStartupTime(): Instant = startupTime0

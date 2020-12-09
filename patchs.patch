@@ -1,3 +1,17 @@
+diff --git a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java b/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
+index d19884c7..1c5d918c 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
++++ b/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
+@@ -52,7 +52,8 @@ public class ApiPlatform implements Platform, PluginMetadata {
+ 
+     @Override
+     public @NonNull String getApiVersion() {
+-        String[] version = this.plugin.getBootstrap().getVersion().split("\\.");
++        String[] version = this.plugin.getBootstrap().getVersionLuckPerms().split("\\.");
++        version[1] = version[1].replace("-SNAPSHOT", "");
+         return version[0] + '.' + version[1];
+     }
+ 
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 index 5d9493d6..a44cf6ab 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
@@ -194,17 +208,23 @@ index c2027ee6..d944244c 100644
                      .color(AQUA)
                      .append(text("-  ", WHITE))
 diff --git a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
-index 4d18a152..74e1ac4d 100644
+index 4d18a152..06fdb8c4 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
-@@ -227,4 +227,8 @@ public interface LuckPermsBootstrap {
+@@ -227,4 +227,14 @@ public interface LuckPermsBootstrap {
          return null;
      }
  
 +
++    // LuckPerms Mirai - Start
++
 +    default String versionOnCommandRender() {
 +        return null;
 +    }
++
++    String getVersionLuckPerms();
++
++    // LuckPerms Mirai - End
  }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
 index a9cd81d1..730b4b12 100644
