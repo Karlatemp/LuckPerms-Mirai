@@ -160,9 +160,6 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                     is AbstractPermitteeId.AnyContact -> {
                         UUID_ANY_CONTEXT_SELECTOR
                     }
-                    is AbstractPermitteeId.AnyGroup -> {
-                        UUID_ANY_GROUP_SELECTOR
-                    }
                     is AbstractPermitteeId.AnyFriend -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
@@ -186,7 +183,12 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                             MiraiConnectionListener.instance.recUsr(it)
                         })
                     }
+                    is AbstractPermitteeId.AnyGroup -> {
+                        // TODO
+                        UUID_ANY_GROUP_SELECTOR
+                    }
                     is AbstractPermitteeId.ExactGroup -> {
+                        // TODO
                         UUID_ANY_GROUP_SELECTOR
                     }
                     is AbstractPermitteeId.ExactMember -> {
@@ -250,6 +252,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         )
         DebugKit.log { "UUID $user with lnum ${user.leastSignificantBits}, permissions = ${permissionData.permissionMap}" }
         return testPermission(permission, permissionData, permission)
+                || DebugKit.isTrusted(permitteeId)
     }
 
     private fun testPermission(
@@ -287,12 +290,14 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     override fun cancel(permitteeId: PermitteeId, permission: LuckPermsPermission, recursive: Boolean) {
         if (permitteeId is AbstractPermitteeId.Console)
             return
+        // TODO Group Permissions
         throw UnsupportedOperationException("Only allowed CLI or Direct Cancel")
     }
 
     override fun permit(permitteeId: PermitteeId, permission: LuckPermsPermission) {
         if (permitteeId is AbstractPermitteeId.Console)
             return
+        // TODO Group Permissions
         throw UnsupportedOperationException("Only allowed CLI or Direct Permit")
     }
 }

@@ -12,12 +12,40 @@
 package io.github.karlatemp.luckperms.mirai.logging
 
 import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
+import net.mamoe.mirai.console.permission.AbstractPermitteeId
+import net.mamoe.mirai.console.permission.PermitteeId
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 internal object DebugKit {
+    @JvmField
     var isDebugEnabled = false
+
+    @JvmField
+    var trustedUsers: MutableList<Long>? = null
+
+    @OptIn(ExperimentalContracts::class)
     inline fun log(msg: () -> String) {
+        contract { callsInPlace(msg, InvocationKind.AT_MOST_ONCE) }
         if (isDebugEnabled) {
             LPMiraiPlugin.logger.info("[DEBUG] ${msg()}")
         }
+    }
+
+    fun isTrusted(sender: PermitteeId): Boolean {
+        return isTrusted(
+            when (sender) {
+                is AbstractPermitteeId.ExactUser -> sender.id
+                is AbstractPermitteeId.ExactFriend -> sender.id
+                is AbstractPermitteeId.ExactMember -> sender.memberId
+                is AbstractPermitteeId.ExactTemp -> sender.memberId
+                else -> return false
+            }
+        )
+    }
+
+    fun isTrusted(id: Long): Boolean {
+        return (trustedUsers ?: return false).contains(id)
     }
 }

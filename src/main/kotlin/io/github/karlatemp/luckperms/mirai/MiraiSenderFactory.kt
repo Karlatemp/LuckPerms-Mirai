@@ -12,6 +12,7 @@
 package io.github.karlatemp.luckperms.mirai
 
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
+import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.util.ChatColor
 import io.github.karlatemp.luckperms.mirai.util.colorTranslator
 import kotlinx.coroutines.runBlocking
@@ -97,6 +98,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
 
     override fun hasPermission(sender: Permittee, node: String): Boolean {
         return getPermissionValue0(sender, node) == Tristate.TRUE
+                || DebugKit.isTrusted(sender.permitteeId)
     }
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
