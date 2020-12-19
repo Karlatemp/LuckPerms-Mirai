@@ -20,12 +20,11 @@ import net.mamoe.mirai.console.permission.AbstractPermitteeId
 import net.mamoe.mirai.console.permission.PermitteeId
 import net.mamoe.mirai.contact.Member
 import net.mamoe.mirai.contact.isOperator
-import net.mamoe.mirai.getGroupOrNull
 
 object MiraiCalculator : ContextCalculator<PermitteeId> {
     private fun scanMember(group: Long, member: Long): Member? {
-        Bot.botInstancesSequence.forEach { bot ->
-            bot.getGroupOrNull(group)?.getOrNull(member)?.let { return it }
+        Bot.instancesSequence.forEach { bot ->
+            bot.getGroup(group)?.get(member)?.let { return it }
         }
         return null
     }

@@ -193,11 +193,71 @@ index 982093d3..755a3efb 100644
  
          return WebEditorRequest.generate(holders, tracks, sender, label, plugin)
                  .createSession(plugin, sender);
+diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
+index 22899d21..9f011229 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
++++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
+@@ -49,6 +49,7 @@ import java.util.Map;
+ import java.util.Objects;
+ import java.util.Set;
+ import java.util.concurrent.CountDownLatch;
++import java.util.concurrent.atomic.AtomicBoolean;
+ 
+ /**
+  * Loads and manages runtime dependencies for the plugin.
+@@ -121,10 +122,12 @@ public class DependencyManager {
+     public void loadDependencies(Set<Dependency> dependencies) {
+         CountDownLatch latch = new CountDownLatch(dependencies.size());
+ 
++        AtomicBoolean downloading = new AtomicBoolean(false);
++
+         for (Dependency dependency : dependencies) {
+             this.plugin.getBootstrap().getScheduler().async().execute(() -> {
+                 try {
+-                    loadDependency(dependency);
++                    loadDependency(dependency, downloading);
+                 } catch (Throwable e) {
+                     this.plugin.getLogger().severe("Unable to load dependency " + dependency.name() + ".", e);
+                 } finally {
+@@ -140,12 +143,12 @@ public class DependencyManager {
+         }
+     }
+ 
+-    private void loadDependency(Dependency dependency) throws Exception {
++    private void loadDependency(Dependency dependency, AtomicBoolean downloading) throws Exception {
+         if (this.loaded.containsKey(dependency)) {
+             return;
+         }
+ 
+-        Path file = remapDependency(dependency, downloadDependency(dependency));
++        Path file = remapDependency(dependency, downloadDependency(dependency, downloading));
+ 
+         this.loaded.put(dependency, file);
+ 
+@@ -154,7 +157,7 @@ public class DependencyManager {
+         }
+     }
+ 
+-    private Path downloadDependency(Dependency dependency) throws DependencyDownloadException {
++    private Path downloadDependency(Dependency dependency, AtomicBoolean downloading) throws DependencyDownloadException {
+         Path file = this.cacheDirectory.resolve(dependency.getFileName() + ".jar");
+ 
+         // if the file already exists, don't attempt to re-download it.
+@@ -167,6 +170,9 @@ public class DependencyManager {
+         // attempt to download the dependency from each repo in order.
+         for (DependencyRepository repo : DependencyRepository.values()) {
+             try {
++                if (downloading.compareAndSet(false, true)) {
++                    plugin.getLogger().info("Downloading dependencies.... Please wait....");
++                }
+                 repo.download(dependency, file);
+                 return file;
+             } catch (DependencyDownloadException e) {
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-index c2027ee6..d944244c 100644
+index e9b81b71..a4d49e0a 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-@@ -1368,8 +1368,7 @@ public interface Message {
+@@ -1383,8 +1383,7 @@ public interface Message {
                      .append(text(':'))),
              prefixed(text()
                      .color(WHITE)

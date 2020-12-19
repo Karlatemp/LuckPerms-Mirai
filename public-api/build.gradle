@@ -24,8 +24,8 @@ dependencies {
 
     compileOnly "me.lucko.luckperms:common" // LuckPerms
 
-    compileOnly("net.mamoe:mirai-core:1.2.3")
-    compileOnly("net.mamoe:mirai-console:1.0-RC")
+    compileOnly(project.property('versions.mirai-core-api'))
+    compileOnly(project.property('versions.mirai-console'))
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 

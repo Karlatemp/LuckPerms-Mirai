@@ -14,8 +14,8 @@ package io.github.karlatemp.luckperms.mirai
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener
 import net.mamoe.mirai.event.Listener
+import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.subscribeAlways
-import net.mamoe.mirai.message.MessageEvent
 import net.mamoe.mirai.message.data.At
 import java.util.*
 

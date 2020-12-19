@@ -59,7 +59,6 @@ import net.mamoe.mirai.console.permission.PermissionId
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Friend
-import net.mamoe.mirai.getFriendOrNull
 import net.mamoe.mirai.message.data.*
 import java.io.IOException
 import java.nio.file.Files
@@ -236,12 +235,12 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                 val qid = uid.leastSignificantBits
                 when (val subject = contract.subject) {
                     is net.mamoe.mirai.contact.Group -> {
-                        subject.getOrNull(qid)?.let { member ->
+                        subject[qid]?.let { member ->
                             return Optional.of(contextManager0.getQueryOptions(member.permitteeId))
                         }
                     }
                     is Friend -> {
-                        subject.bot.getFriendOrNull(qid)?.let { friend ->
+                        subject.bot.getFriend(qid)?.let { friend ->
                             return Optional.of(contextManager0.getQueryOptions(friend.permitteeId))
                         }
                     }

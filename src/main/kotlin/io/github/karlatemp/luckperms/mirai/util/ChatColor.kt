@@ -133,7 +133,7 @@ enum class ChatColor {
          * The special character which prefixes all chat colour codes. Use this if
          * you need to dynamically convert colour codes from your custom format.
          */
-        const val COLOR_CHAR: Char = '\u00A7';
+        const val COLOR_CHAR: Char = '\u00A7'
         private val STRIP_COLOR_PATTERN: Pattern = Pattern.compile(
             "(?i)$COLOR_CHAR[0-9A-FK-ORX]"
         )
@@ -141,7 +141,7 @@ enum class ChatColor {
         private val BY_CHAR: HashMap<Char, ChatColor> = HashMap()
 
         fun getByChar(code: Char): ChatColor? {
-            return BY_CHAR[code];
+            return BY_CHAR[code]
         }
 
         /**
@@ -153,7 +153,7 @@ enum class ChatColor {
          */
         fun getByChar(code: String): ChatColor? {
             check(code.isNotEmpty()) { "Code must have at least one char" }
-            return BY_CHAR[code[0]];
+            return BY_CHAR[code[0]]
         }
 
         /**
@@ -164,7 +164,7 @@ enum class ChatColor {
          */
         fun stripColor(input: String): String {
 
-            return STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
+            return STRIP_COLOR_PATTERN.matcher(input).replaceAll("")
         }
 
         /**
@@ -181,8 +181,8 @@ enum class ChatColor {
             val b = textToTranslate.toCharArray()
             for (i in 0 until b.size - 1) {
                 if (b[i] == altColorChar && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
-                    b[i] = ChatColor.COLOR_CHAR;
-                    b[i + 1] = Character.toLowerCase(b[i + 1]);
+                    b[i] = ChatColor.COLOR_CHAR
+                    b[i + 1] = Character.toLowerCase(b[i + 1])
                 }
             }
             return String(b)
@@ -203,7 +203,7 @@ enum class ChatColor {
                 val section = input[index]
                 if (section == COLOR_CHAR && index < length - 1) {
                     val c = input[index + 1]
-                    val color = getByChar(c);
+                    val color = getByChar(c)
                     if (color != null) {
                         result = color.toString() + result
 
@@ -215,31 +215,31 @@ enum class ChatColor {
                 }
             }
 
-            return result;
+            return result
         }
 
         init {
             for (color in values()) {
-                BY_ID[color.intCode] = color;
-                BY_CHAR[color.code] = color;
+                BY_ID[color.intCode] = color
+                BY_CHAR[color.code] = color
             }
         }
 
     }
 
-    val intCode: Int;
-    val code: Char;
-    val isFormat: Boolean;
-    val toString: String;
+    val intCode: Int
+    val code: Char
+    val isFormat: Boolean
+    val toString: String
 
     constructor(code: Char, intCode: Int) : this(code, intCode, false)
 
 
     constructor(code: Char, intCode: Int, isFormat: Boolean) {
-        this.code = code;
-        this.intCode = intCode;
-        this.isFormat = isFormat;
-        this.toString = String(charArrayOf(COLOR_CHAR, code));
+        this.code = code
+        this.intCode = intCode
+        this.isFormat = isFormat
+        this.toString = String(charArrayOf(COLOR_CHAR, code))
     }
 
     override fun toString(): String {
@@ -253,7 +253,7 @@ enum class ChatColor {
      */
     val isColor: Boolean
         get() {
-            return !isFormat && this != RESET;
+            return !isFormat && this != RESET
         }
 
 }

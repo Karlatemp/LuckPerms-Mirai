@@ -48,7 +48,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
         sendMessage(sender, LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)))
     }
 
-    public fun sendMessage(sender: Permittee, message: String) {
+    fun sendMessage(sender: Permittee, message: String) {
         runBlocking {
             when (sender) {
                 is ConsoleCommandSender -> {

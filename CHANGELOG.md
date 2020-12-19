@@ -1,3 +1,9 @@
+# 2.0-M1-dev-1
+
+- Recompile with
+    - Mirai-Console - 2.0-M1
+    - Mirai-Core    - 2.0-M1
+
 # 1.6.1
 
 - 修复 `/lp editor` 没有显示全部已注册权限的问题
