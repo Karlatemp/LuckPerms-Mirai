@@ -225,7 +225,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
         }
     }
 
-    private lateinit var connectionListener0: AbstractConnectionListener
+    private lateinit var connectionListener0: MiraiConnectionListener
     override fun getConnectionListener(): AbstractConnectionListener = connectionListener0
 
     override fun getQueryOptionsForUser(user: User): Optional<QueryOptions> {
@@ -346,5 +346,6 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     }
 
     override fun performFinalSetup() {
+        connectionListener0.loadInternalUsers()
     }
 }

@@ -79,7 +79,11 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
                         consumer.accept("type", "friend")
                         consumer.accept("contract", "user")
                     }
-                    is AbstractPermitteeId.ExactTemp -> {
+                    is AbstractPermitteeId.ExactStranger -> {
+                        consumer.accept("type", "stranger")
+                        consumer.accept("contract", "user")
+                    }
+                    is AbstractPermitteeId.ExactGroupTemp -> {
                         consumer.accept("contract", "user")
                         consumer.accept("type", "temp")
                         consumer.accept("group", target.groupId.toString())
@@ -95,11 +99,15 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
                         consumer.accept("mode", "group")
                         consumer.accept("contract", "user")
                     }
+                    AbstractPermitteeId.AnyStranger -> {
+                        consumer.accept("mode", "stranger")
+                        consumer.accept("contract", "user")
+                    }
                     AbstractPermitteeId.AnyFriend -> {
                         consumer.accept("mode", "friend")
                         consumer.accept("contract", "user")
                     }
-                    is AbstractPermitteeId.AnyTemp -> {
+                    is AbstractPermitteeId.AnyGroupTemp -> {
                         consumer.accept("contract", "user")
                         consumer.accept("mode", "temp")
                         consumer.accept("group", target.groupId.toString())

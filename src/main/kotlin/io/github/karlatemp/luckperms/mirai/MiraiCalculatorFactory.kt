@@ -23,7 +23,7 @@ object MiraiCalculatorFactory : CalculatorFactory {
 
     override fun build(queryOptions: QueryOptions?, metadata: CacheMetadata?): PermissionCalculator? {
         val processors = ImmutableList.builder<PermissionProcessor>()
-        processors.add(MapProcessor())
+        processors.add(DirectProcessor())
         val plugin = LPMiraiPlugin
         if (plugin.configuration.get(ConfigKeys.APPLYING_REGEX)) {
             processors.add(RegexProcessor())

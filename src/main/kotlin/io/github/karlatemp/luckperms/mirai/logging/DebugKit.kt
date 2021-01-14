@@ -38,8 +38,9 @@ internal object DebugKit {
             when (sender) {
                 is AbstractPermitteeId.ExactUser -> sender.id
                 is AbstractPermitteeId.ExactFriend -> sender.id
+                is AbstractPermitteeId.ExactStranger -> sender.id
                 is AbstractPermitteeId.ExactMember -> sender.memberId
-                is AbstractPermitteeId.ExactTemp -> sender.memberId
+                is AbstractPermitteeId.ExactGroupTemp -> sender.memberId
                 else -> return false
             }
         )

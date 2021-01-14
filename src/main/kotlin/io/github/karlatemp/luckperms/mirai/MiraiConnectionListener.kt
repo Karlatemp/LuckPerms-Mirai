@@ -13,9 +13,9 @@ package io.github.karlatemp.luckperms.mirai
 
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import me.lucko.luckperms.common.plugin.util.AbstractConnectionListener
-import net.mamoe.mirai.event.Listener
+import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.subscribeAlways
+import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.message.data.At
 import java.util.*
 
@@ -39,9 +39,24 @@ class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
         }
     }
 
+    internal fun loadInternalUsers() {
+        fun rec(uid: UUID, name: String) {
+            // UUID_ANY_MEMBER_SELECTOR
+            val loaded = LPMiraiPlugin.apiProvider.userManager.getUser(uid)
+            if (loaded == null) {
+                loadUser(uid, name)
+                recordConnection(uid)
+            }
+        }
+        rec(UUID_ANY_MEMBER_SELECTOR, "MemberSelector")
+        rec(UUID_ANY_GROUP_SELECTOR, "GroupSelector")
+        rec(UUID_ANY_CONTEXT_SELECTOR, "ContextSelector")
+        rec(UUID_OTHER_CLIENT, "OtherClient")
+    }
+
     fun registerListeners() {
-        LPMiraiBootstrap.subscribeAlways<MessageEvent>(
-            priority = Listener.EventPriority.HIGHEST
+        LPMiraiBootstrap.globalEventChannel().subscribeAlways<MessageEvent>(
+            priority = EventPriority.HIGHEST
         ) {
             recUsr(sender.id)
             message.forEach { elm ->

@@ -163,7 +163,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                     is AbstractPermitteeId.AnyFriend -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
-                    is AbstractPermitteeId.AnyTemp -> {
+                    is AbstractPermitteeId.AnyGroupTemp -> {
                         UUID_ANY_MEMBER_SELECTOR
                     }
                     is AbstractPermitteeId.AnyUser -> {
@@ -196,7 +196,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                             MiraiConnectionListener.instance.recUsr(it)
                         })
                     }
-                    is AbstractPermitteeId.ExactTemp -> {
+                    is AbstractPermitteeId.ExactGroupTemp -> {
                         UUID(MAGIC_UUID_HIGH_BITS, identifier.memberId.also {
                             MiraiConnectionListener.instance.recUsr(it)
                         })
@@ -206,7 +206,15 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
                             MiraiConnectionListener.instance.recUsr(it)
                         })
                     }
+                    is AbstractPermitteeId.ExactStranger -> {
+                        UUID(MAGIC_UUID_HIGH_BITS, identifier.id.also {
+                            MiraiConnectionListener.instance.recUsr(it)
+                        })
+                    }
                     AbstractPermitteeId.AnyTempFromAnyGroup -> UUID_ANY_MEMBER_SELECTOR
+                    AbstractPermitteeId.AnyStranger -> UUID_ANY_MEMBER_SELECTOR
+                    AbstractPermitteeId.AnyOtherClient -> UUID_OTHER_CLIENT
+                    else -> throw AssertionError("Assertion Error: $identifier, ${identifier.javaClass}")
                 }
             }
             is CustomPermitteeId -> identifier.uuid

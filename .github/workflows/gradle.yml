@@ -24,5 +24,7 @@ jobs:
       run: chmod +x gradlew
     - name: Init git submodule
       run: git submodule update --init --recursive
+    - name: Patch LuckPerms
+      run: sh scripts/repatch.sh
     - name: Build with Gradle
-      run: ./gradlew :applyPatch :build
+      run: ./gradlew :build
