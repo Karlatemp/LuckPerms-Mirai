@@ -13,7 +13,7 @@ index d19884c7..1c5d918c 100644
      }
  
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-index f2f82913..b3509282 100644
+index f0cec28b..a9007c9f 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 @@ -26,7 +26,6 @@
@@ -32,24 +32,24 @@ index f2f82913..b3509282 100644
  import net.kyori.adventure.text.Component;
  import net.kyori.adventure.text.event.ClickEvent;
  import net.kyori.adventure.text.format.NamedTextColor;
-@@ -76,6 +74,7 @@ import java.util.concurrent.ExecutorService;
- import java.util.concurrent.Executors;
+@@ -75,6 +73,7 @@ import java.util.concurrent.CompletableFuture;
+ import java.util.concurrent.locks.ReentrantLock;
  import java.util.function.Function;
  import java.util.stream.Collectors;
 +import java.util.stream.Stream;
  
  /**
   * Root command manager for the '/luckperms' command.
-@@ -94,7 +93,7 @@ public class CommandManager {
-     public CommandManager(LuckPermsPlugin plugin) {
+@@ -90,7 +89,7 @@ public class CommandManager {
          this.plugin = plugin;
+         this.lock = new ReentrantLock(true); // enable fairness
          this.tabCompletions = new TabCompletions(plugin);
 -        this.mainCommands = ImmutableList.<Command<?>>builder()
 +        this.mainCommands = Stream.concat(ImmutableList.<Command<?>>builder()
                  .add(new UserParentCommand())
                  .add(new GroupParentCommand())
                  .add(new TrackParentCommand())
-@@ -120,10 +119,14 @@ public class CommandManager {
+@@ -116,10 +115,14 @@ public class CommandManager {
                  .add(new DeleteTrack())
                  .add(new ListTracks())
                  .build()
@@ -65,7 +65,7 @@ index f2f82913..b3509282 100644
      public LuckPermsPlugin getPlugin() {
          return this.plugin;
      }
-@@ -147,11 +150,35 @@ public class CommandManager {
+@@ -146,11 +149,35 @@ public class CommandManager {
          return this.mainCommands.values().stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender));
      }
  
@@ -101,7 +101,7 @@ index f2f82913..b3509282 100644
              sender.sendMessage(Message.prefixed(Component.text()
                      .color(NamedTextColor.DARK_GREEN)
                      .append(Component.text("Running "))
-@@ -161,15 +188,15 @@ public class CommandManager {
+@@ -160,15 +187,15 @@ public class CommandManager {
                      .append(Message.FULL_STOP)
              ));
  
@@ -120,7 +120,7 @@ index f2f82913..b3509282 100644
                  Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
              }
              return CommandResult.NO_PERMISSION;
-@@ -232,14 +259,6 @@ public class CommandManager {
+@@ -231,14 +258,6 @@ public class CommandManager {
      }
  
      private void sendCommandUsage(Sender sender, String label) {
