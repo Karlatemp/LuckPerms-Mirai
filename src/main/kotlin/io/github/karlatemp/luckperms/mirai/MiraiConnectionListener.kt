@@ -58,6 +58,7 @@ class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
         LPMiraiBootstrap.globalEventChannel().subscribeAlways<MessageEvent>(
             priority = EventPriority.HIGHEST
         ) {
+            loadInternalUsers()
             recUsr(sender.id)
             message.forEach { elm ->
                 if (elm is At) {
