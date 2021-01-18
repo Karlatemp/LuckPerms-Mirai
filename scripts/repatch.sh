@@ -13,5 +13,7 @@ cd LuckPerms || exit
 
 git checkout --force HEAD
 git apply --reject ../patchs.patch
+tmerr=$?
 
 cd ..
+exit $tmerr
