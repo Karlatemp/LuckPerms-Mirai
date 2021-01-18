@@ -13,6 +13,8 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
+    id 'com.jfrog.bintray' version '1.8.5'
+    id("maven-publish")
 }
 
 dependencies {
@@ -29,4 +31,53 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
+}
+
+task sourceJar(type: Jar) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.allSource)
+}
+bintray {
+    user = project.findProperty("bintray.user") ?: System.getenv("USERNAME")
+    println("user is $user")
+    key = project.findProperty('bintray.key') ?: System.getenv("TOKEN")
+
+    override = true
+    publish = true
+
+    publications = ['mavenPublication']
+
+    pkg {
+        repo = 'luckperms'
+        name = 'public-api'
+        licenses = ['AGPLv3']
+        vcsUrl = 'https://github.com/Karlatemp/LuckPerms-Mirai.git'
+        version {
+            name = project.version
+            desc = project.version
+            released = new Date()
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from(components.java)
+            artifact sourceJar
+            pom {
+                name = 'LuckPerms Mirai - public api'
+                description = 'Public api for LuckPerms'
+                url = 'https://github.com/Karlatemp/LuckPerms-Mirai'
+            }
+            pom.withXml {
+                Node pomNode = asNode()
+                pomNode.dependencies.'*'.findAll() {
+                    true
+                }.each() {
+                    it.parent().remove(it)
+                }
+            }
+        }
+    }
 }
