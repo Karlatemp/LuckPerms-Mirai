@@ -11,7 +11,7 @@
 
 cd LuckPerms || exit
 
-git checkout --force HEAD
+git reset --hard HEAD
 git apply --reject ../patchs.patch
 tmerr=$?
 
