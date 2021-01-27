@@ -1,3 +1,28 @@
+diff --git a/build.gradle b/build.gradle
+index a9ec591d..738820aa 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -58,6 +58,7 @@ subprojects {
+ 
+     repositories {
+         mavenCentral()
++        jcenter()
+         maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+         maven { url 'https://repo.lucko.me/' }
+     }
+diff --git a/common/build.gradle b/common/build.gradle
+index 3f66ed81..b41d0eb6 100644
+--- a/common/build.gradle
++++ b/common/build.gradle
+@@ -5,6 +5,8 @@ test {
+ }
+ 
+ dependencies {
++    compile 'io.github.karlatemp:unsafe-accessor:1.2.2'
++
+     testCompile 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+ 
 diff --git a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java b/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
 index d19884c7..1c5d918c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
@@ -231,6 +256,36 @@ index 22899d21..9f011229 100644
                  repo.download(dependency, file);
                  return file;
              } catch (DependencyDownloadException e) {
+diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java
+index e68cc43d..d0439964 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java
++++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java
+@@ -41,16 +41,25 @@ public class ReflectionClassLoader implements PluginClassLoader {
+     static {
+         // If on Java 9+, open the URLClassLoader module to this module
+         // so we can access its API via reflection without producing a warning.
++        /*
+         try {
+             openUrlClassLoaderModule();
+         } catch (Throwable e) {
+             // ignore exception - will throw on Java 8 since the Module classes don't exist
+         }
++         */
+ 
+         // Get the protected 'addURL' method on URLClassLoader and set it to accessible.
+         try {
+             ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
++            /* LuckPerms Mirai
++            We using DarkMagic to access this method
++            UnsafeAccessor Project: https://github.com/Karlatemp/UnsafeAccessor
++            @see https://github.com/lucko/LuckPerms/issues/2853
++
+             ADD_URL_METHOD.setAccessible(true);
++            */
++            io.github.karlatemp.unsafeaccessor.Root.openAccess(ADD_URL_METHOD);
+         } catch (NoSuchMethodException e) {
+             throw new RuntimeException(e);
+         }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 index 13fc0ebf..fdd43e34 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java

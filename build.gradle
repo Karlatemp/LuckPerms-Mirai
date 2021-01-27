@@ -126,6 +126,7 @@ processResources {
 
 shadowJar {
     exclude 'module-info.class'
+    relocate 'io.github.karlatemp.unsafeaccessor', 'me.lucko.luckperms.lib.unsafeaccessor'
     relocate 'net.kyori.adventure', 'me.lucko.luckperms.lib.adventure'
     relocate 'net.kyori.event', 'me.lucko.luckperms.lib.eventbus'
     relocate 'com.github.benmanes.caffeine', 'me.lucko.luckperms.lib.caffeine'
