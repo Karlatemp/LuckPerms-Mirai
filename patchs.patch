@@ -11,7 +11,7 @@ index a9ec591d..738820aa 100644
          maven { url 'https://repo.lucko.me/' }
      }
 diff --git a/common/build.gradle b/common/build.gradle
-index 3f66ed81..b41d0eb6 100644
+index f1edd15e..b1dae6c4 100644
 --- a/common/build.gradle
 +++ b/common/build.gradle
 @@ -5,6 +5,8 @@ test {
@@ -38,7 +38,7 @@ index d19884c7..1c5d918c 100644
      }
  
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-index f0cec28b..a9007c9f 100644
+index 22195db7..2d002c38 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 @@ -26,7 +26,6 @@
@@ -49,15 +49,7 @@ index f0cec28b..a9007c9f 100644
  import me.lucko.luckperms.common.command.abstraction.Command;
  import me.lucko.luckperms.common.command.abstraction.CommandException;
  import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
-@@ -62,7 +61,6 @@ import me.lucko.luckperms.common.plugin.AbstractLuckPermsPlugin;
- import me.lucko.luckperms.common.plugin.LuckPermsPlugin;
- import me.lucko.luckperms.common.sender.Sender;
- import me.lucko.luckperms.common.util.ImmutableCollectors;
--
- import net.kyori.adventure.text.Component;
- import net.kyori.adventure.text.event.ClickEvent;
- import net.kyori.adventure.text.format.NamedTextColor;
-@@ -75,6 +73,7 @@ import java.util.concurrent.CompletableFuture;
+@@ -79,6 +78,7 @@ import java.util.concurrent.atomic.AtomicReference;
  import java.util.concurrent.locks.ReentrantLock;
  import java.util.function.Function;
  import java.util.stream.Collectors;
@@ -65,7 +57,7 @@ index f0cec28b..a9007c9f 100644
  
  /**
   * Root command manager for the '/luckperms' command.
-@@ -90,7 +89,7 @@ public class CommandManager {
+@@ -94,7 +94,7 @@ public class CommandManager {
          this.plugin = plugin;
          this.lock = new ReentrantLock(true); // enable fairness
          this.tabCompletions = new TabCompletions(plugin);
@@ -74,7 +66,7 @@ index f0cec28b..a9007c9f 100644
                  .add(new UserParentCommand())
                  .add(new GroupParentCommand())
                  .add(new TrackParentCommand())
-@@ -116,10 +115,14 @@ public class CommandManager {
+@@ -120,14 +120,28 @@ public class CommandManager {
                  .add(new DeleteTrack())
                  .add(new ListTracks())
                  .build()
@@ -90,9 +82,6 @@ index f0cec28b..a9007c9f 100644
      public LuckPermsPlugin getPlugin() {
          return this.plugin;
      }
-@@ -146,11 +149,35 @@ public class CommandManager {
-         return this.mainCommands.values().stream().anyMatch(c -> c.shouldDisplay() && c.isAuthorized(sender));
-     }
  
 +    protected CommandResult preExecute(Sender sender, String label, List<String> arguments) {
 +        return null;
@@ -104,17 +93,21 @@ index f0cec28b..a9007c9f 100644
 +        return true;
 +    }
 +
+     public TabCompletions getTabCompletions() {
+         return this.tabCompletions;
+     }
+@@ -178,10 +192,22 @@ public class CommandManager {
+     }
+ 
      private CommandResult execute(Sender sender, String label, List<String> arguments) {
-+
 +        {
 +            CommandResult result = preExecute(sender, label, arguments);
 +            if (result != null) return result;
 +        }
-+
          applyConvenienceAliases(arguments, true);
  
          // Handle no arguments
-         if (arguments.isEmpty() || (arguments.size() == 1 && arguments.get(0).trim().isEmpty())) {
+         if (arguments.isEmpty() || arguments.size() == 1 && arguments.get(0).trim().isEmpty()) {
 +            boolean hasPermAny = hasPermissionForAny(sender);
 +            boolean isFirstTime = false;
 +            if (!hasPermAny) {
@@ -126,7 +119,7 @@ index f0cec28b..a9007c9f 100644
              sender.sendMessage(Message.prefixed(Component.text()
                      .color(NamedTextColor.DARK_GREEN)
                      .append(Component.text("Running "))
-@@ -160,15 +187,15 @@ public class CommandManager {
+@@ -191,15 +217,15 @@ public class CommandManager {
                      .append(Message.FULL_STOP)
              ));
  
@@ -145,7 +138,7 @@ index f0cec28b..a9007c9f 100644
                  Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
              }
              return CommandResult.NO_PERMISSION;
-@@ -231,14 +258,6 @@ public class CommandManager {
+@@ -262,14 +288,6 @@ public class CommandManager {
      }
  
      private void sendCommandUsage(Sender sender, String label) {
@@ -173,7 +166,7 @@ index 606c4b79..b6f8a3d4 100644
      SYNC("sync", Type.NONE),
      INFO("info", Type.NONE),
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
-index 4da7153f..89cea0e3 100644
+index ebf9f665..5b962955 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
 @@ -37,6 +37,7 @@ import java.util.List;
@@ -287,10 +280,10 @@ index e68cc43d..d0439964 100644
              throw new RuntimeException(e);
          }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-index 13fc0ebf..fdd43e34 100644
+index 29338bf9..5c2701b4 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-@@ -1340,8 +1340,7 @@ public interface Message {
+@@ -1346,8 +1346,7 @@ public interface Message {
                      .append(text(':'))),
              prefixed(text()
                      .color(WHITE)
