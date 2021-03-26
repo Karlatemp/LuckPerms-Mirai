@@ -1,16 +1,3 @@
-diff --git a/common/build.gradle b/common/build.gradle
-index f1edd15e..3d81ff42 100644
---- a/common/build.gradle
-+++ b/common/build.gradle
-@@ -5,6 +5,8 @@ test {
- }
- 
- dependencies {
-+    compile 'io.github.karlatemp:unsafe-accessor:1.3.0'
-+
-     testCompile 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
- 
 diff --git a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java b/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
 index d19884c7..1c5d918c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
@@ -26,35 +13,27 @@ index d19884c7..1c5d918c 100644
      }
  
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-index 22195db7..2d002c38 100644
+index fc61cafd..f4ce4332 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-@@ -26,7 +26,6 @@
- package me.lucko.luckperms.common.command;
- 
- import com.google.common.collect.ImmutableList;
--
- import me.lucko.luckperms.common.command.abstraction.Command;
- import me.lucko.luckperms.common.command.abstraction.CommandException;
- import me.lucko.luckperms.common.command.tabcomplete.CompletionSupplier;
-@@ -79,6 +78,7 @@ import java.util.concurrent.atomic.AtomicReference;
- import java.util.concurrent.locks.ReentrantLock;
+@@ -84,6 +84,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
+ import java.util.concurrent.atomic.AtomicReference;
  import java.util.function.Function;
  import java.util.stream.Collectors;
 +import java.util.stream.Stream;
  
  /**
   * Root command manager for the '/luckperms' command.
-@@ -94,7 +94,7 @@ public class CommandManager {
+@@ -103,7 +104,7 @@ public class CommandManager {
+     public CommandManager(LuckPermsPlugin plugin) {
          this.plugin = plugin;
-         this.lock = new ReentrantLock(true); // enable fairness
          this.tabCompletions = new TabCompletions(plugin);
 -        this.mainCommands = ImmutableList.<Command<?>>builder()
 +        this.mainCommands = Stream.concat(ImmutableList.<Command<?>>builder()
                  .add(new UserParentCommand())
                  .add(new GroupParentCommand())
                  .add(new TrackParentCommand())
-@@ -120,14 +120,28 @@ public class CommandManager {
+@@ -129,14 +130,28 @@ public class CommandManager {
                  .add(new DeleteTrack())
                  .add(new ListTracks())
                  .build()
@@ -84,7 +63,7 @@ index 22195db7..2d002c38 100644
      public TabCompletions getTabCompletions() {
          return this.tabCompletions;
      }
-@@ -178,10 +192,22 @@ public class CommandManager {
+@@ -208,10 +223,22 @@ public class CommandManager {
      }
  
      private CommandResult execute(Sender sender, String label, List<String> arguments) {
@@ -107,7 +86,7 @@ index 22195db7..2d002c38 100644
              sender.sendMessage(Message.prefixed(Component.text()
                      .color(NamedTextColor.DARK_GREEN)
                      .append(Component.text("Running "))
-@@ -191,15 +217,15 @@ public class CommandManager {
+@@ -221,15 +248,15 @@ public class CommandManager {
                      .append(Message.FULL_STOP)
              ));
  
@@ -126,7 +105,7 @@ index 22195db7..2d002c38 100644
                  Message.NO_PERMISSION_FOR_SUBCOMMANDS.send(sender);
              }
              return CommandResult.NO_PERMISSION;
-@@ -262,14 +288,6 @@ public class CommandManager {
+@@ -292,14 +319,6 @@ public class CommandManager {
      }
  
      private void sendCommandUsage(Sender sender, String label) {
@@ -178,7 +157,7 @@ index c0fbbdcd..68118f6d 100644
          return WebEditorRequest.generate(holders, tracks, sender, label, plugin)
                  .createSession(plugin, sender);
 diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
-index 22899d21..9f011229 100644
+index 7cbee16a..603ad484 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
 @@ -49,6 +49,7 @@ import java.util.Map;
@@ -237,41 +216,11 @@ index 22899d21..9f011229 100644
                  repo.download(dependency, file);
                  return file;
              } catch (DependencyDownloadException e) {
-diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java
-index e68cc43d..d0439964 100644
---- a/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java
-+++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/classloader/ReflectionClassLoader.java
-@@ -41,16 +41,25 @@ public class ReflectionClassLoader implements PluginClassLoader {
-     static {
-         // If on Java 9+, open the URLClassLoader module to this module
-         // so we can access its API via reflection without producing a warning.
-+        /*
-         try {
-             openUrlClassLoaderModule();
-         } catch (Throwable e) {
-             // ignore exception - will throw on Java 8 since the Module classes don't exist
-         }
-+         */
- 
-         // Get the protected 'addURL' method on URLClassLoader and set it to accessible.
-         try {
-             ADD_URL_METHOD = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-+            /* LuckPerms Mirai
-+            We using DarkMagic to access this method
-+            UnsafeAccessor Project: https://github.com/Karlatemp/UnsafeAccessor
-+            @see https://github.com/lucko/LuckPerms/issues/2853
-+
-             ADD_URL_METHOD.setAccessible(true);
-+            */
-+            io.github.karlatemp.unsafeaccessor.Root.openAccess(ADD_URL_METHOD);
-         } catch (NoSuchMethodException e) {
-             throw new RuntimeException(e);
-         }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-index 29338bf9..5c2701b4 100644
+index dfdd8858..8f6b43a7 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-@@ -1346,8 +1346,7 @@ public interface Message {
+@@ -1347,8 +1347,7 @@ public interface Message {
                      .append(text(':'))),
              prefixed(text()
                      .color(WHITE)
@@ -282,10 +231,10 @@ index 29338bf9..5c2701b4 100644
                      .color(AQUA)
                      .append(text("-  ", WHITE))
 diff --git a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
-index 77dc2d69..ced5cc1b 100644
+index 2680ab00..c904d6fb 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
-@@ -228,4 +228,14 @@ public interface LuckPermsBootstrap {
+@@ -230,4 +230,14 @@ public interface LuckPermsBootstrap {
          return null;
      }
  
@@ -301,10 +250,10 @@ index 77dc2d69..ced5cc1b 100644
 +    // LuckPerms Mirai - End
  }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
-index a9cd81d1..730b4b12 100644
+index 92d177e1..754e615b 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
-@@ -162,4 +162,10 @@ public interface Sender {
+@@ -160,4 +160,10 @@ public interface Sender {
          return true;
      }
  
@@ -316,18 +265,22 @@ index a9cd81d1..730b4b12 100644
 +    default void flush() {}
  }
 diff --git a/settings.gradle b/settings.gradle
-index 01e87906..13859d99 100644
+index 37f93867..00680e6e 100644
 --- a/settings.gradle
 +++ b/settings.gradle
-@@ -13,11 +13,4 @@ rootProject.name = 'luckperms'
- include (
+@@ -14,15 +14,4 @@ include (
          'api',
          'common',
+         'common:loader-utils',
 -        'bukkit',
+-        'bukkit:loader',
 -        'bukkit-legacy',
+-        'bukkit-legacy:loader',
 -        'bungee',
+-        'bungee:loader',
 -        'fabric',
 -        'nukkit',
+-        'nukkit:loader',
 -        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
 -        'velocity'
  )

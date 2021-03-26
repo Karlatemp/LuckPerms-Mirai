@@ -134,4 +134,8 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
             }
         }
     }
+
+    override fun isConsole(sender: Permittee?): Boolean {
+        return sender is ConsoleCommandSender
+    }
 }

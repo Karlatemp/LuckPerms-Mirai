@@ -11,14 +11,13 @@
 
 package io.github.karlatemp.luckperms.mirai
 
-import com.google.auto.service.AutoService
+import io.github.karlatemp.luckperms.mirai.cp.RCP
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import io.github.karlatemp.luckperms.mirai.logging.MiraiPluginLogger
 import io.github.karlatemp.luckperms.mirai.openapi.internal.BackendImpl
-import me.lucko.luckperms.common.dependencies.classloader.PluginClassLoader
-import me.lucko.luckperms.common.dependencies.classloader.ReflectionClassLoader
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap
+import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender
 import me.lucko.luckperms.common.plugin.logging.PluginLogger
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
@@ -56,15 +55,14 @@ internal val gitVersionLuckPerms by lazy {
 internal val gitVersionLuckPermsMirai by lazy {
     versionInfo.getNode("gitversion-plugin").string!!
 }
-internal val luckPermsMiraiVersion by lazy{
+internal val luckPermsMiraiVersion by lazy {
     versionInfo.getNode("plugin").string!!
 }
-internal val luckPermVersion by lazy{
+internal val luckPermVersion by lazy {
     versionInfo.getNode("luckperms").string!!
 }
 
 
-@AutoService(JvmPlugin::class)
 @Suppress("unused")
 object LPMiraiBootstrap : KotlinPlugin(
     JvmPluginDescriptionBuilder(
@@ -82,9 +80,9 @@ object LPMiraiBootstrap : KotlinPlugin(
 
     override fun getScheduler(): SchedulerAdapter = MiraiSchedulerAdapter
 
-    private val classLoader = ReflectionClassLoader(this)
+    override fun getClassPathAppender(): ClassPathAppender = classPathAppender
+    private val classPathAppender = RCP(this)
 
-    override fun getPluginClassLoader(): PluginClassLoader = classLoader
 
     // load/enable latches
     private val loadLatch0 = CountDownLatch(1)
@@ -131,7 +129,8 @@ object LPMiraiBootstrap : KotlinPlugin(
             append("LuckPerms-Mirai provided by Karlatemp. LuckPerms provided by Luck.")
         }
     }
-    override fun versionOnCommandRender():String = serverVersion0
+
+    override fun versionOnCommandRender(): String = serverVersion0
     override fun getServerVersion(): String {
         return "MiraiConsole/$consoleVersion"
     }

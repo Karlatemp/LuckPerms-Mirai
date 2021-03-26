@@ -13,9 +13,8 @@ import java.nio.file.Files
 
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.20'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'org.jetbrains.kotlin.kapt' version '1.4.0'
 }
 
 def lpVersion = ({
@@ -47,7 +46,7 @@ println("GitVersion = $gitVersion")
 println("LpGVersion = $gitLpVersion")
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '2.0-RC-dev-3'
+def lpMiraiVer = '2.5-RC-dev-1'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {
@@ -79,6 +78,9 @@ allprojects {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/io.github.karlatemp/unsafe-accessor
+    implementation group: 'io.github.karlatemp', name: 'unsafe-accessor', version: '1.4.0'
+
     // https://mvnrepository.com/artifact/org.fusesource.jansi/jansi
     compileOnly group: 'org.fusesource.jansi', name: 'jansi', version: '1.18'
     compile 'org.spongepowered:configurate-hocon:3.7.1'
@@ -103,9 +105,6 @@ dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    def autoService = '1.0-rc7'
-    kapt "com.google.auto.service:auto-service:$autoService"
-    compileOnly "com.google.auto.service:auto-service-annotations:$autoService"
 
 }
 
