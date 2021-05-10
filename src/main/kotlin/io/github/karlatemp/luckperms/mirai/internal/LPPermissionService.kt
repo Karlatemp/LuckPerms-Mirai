@@ -19,6 +19,7 @@ import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.openapi.CustomPermitteeId
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache
 import me.lucko.luckperms.common.calculator.result.TristateResult
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
 import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
@@ -226,7 +227,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
 
     private fun String.logConsole() {
         LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-            PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, "internal/console",
+            PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.internal("console"),
             QueryOptions.nonContextual(), this, TristateResult.of(Tristate.TRUE)
         )
         LPMiraiPlugin.permissionRegistry.offer(this)

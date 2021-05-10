@@ -15,7 +15,6 @@ import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.util.newLine
 import io.github.karlatemp.luckperms.mirai.util.sendmsg
-import me.lucko.luckperms.common.command.CommandResult
 import me.lucko.luckperms.common.command.abstraction.SingleCommand
 import me.lucko.luckperms.common.command.access.CommandPermission
 import me.lucko.luckperms.common.command.spec.CommandSpec
@@ -35,7 +34,7 @@ internal object SwitchDebugCommand : SingleCommand(
         sender: Sender,
         args: ArgumentList,
         label: String?
-    ): CommandResult {
+    ) {
         when (args.getOrDefault(0, null)) {
             null -> return sender.sendmsg(buildString {
                 newLine("LuckPerms Mirai - Dev Kit")
@@ -44,7 +43,7 @@ internal object SwitchDebugCommand : SingleCommand(
                 newLine("status - View LuckPermsMirai status")
                 newLine("logger - Enable/Disable debug logger.")
                 newLine("trust  - Temporarily trust full access to another user. (UNSAFE)")
-            }).let { CommandResult.INVALID_ARGS }
+            })
             "status" -> {
                 sender.sendmsg(buildString {
                     newLine("LuckPerms Mirai - Dev Kit")
@@ -75,7 +74,7 @@ internal object SwitchDebugCommand : SingleCommand(
                         newLine("trust [users] - Trust full access to another user")
                         newLine("remove [users] - Drop full access")
                         newLine("reset - Reset trust system")
-                    }).let { CommandResult.INVALID_ARGS }
+                    })
                     "enable" -> {
                         DebugKit.trustedUsers = ArrayList()
                         sender.sendmsg("Enable and reset trust system.")
@@ -113,6 +112,5 @@ internal object SwitchDebugCommand : SingleCommand(
                 sender.sendmsg("Debug mode switch to ${DebugKit.isDebugEnabled}")
             }
         }
-        return CommandResult.SUCCESS
     }
 }

@@ -30,7 +30,7 @@ def lpVersion = ({
 
 def getGitVersion = { String path ->
     def proc = new ProcessBuilder("git", "rev-parse", "HEAD")
-            .directory(new File(path))
+            .directory(new File(rootProject.projectDir, path))
             .start()
     proc.waitFor()
     def line = proc.inputStream.withReader { it.readLine() }
@@ -46,7 +46,7 @@ println("GitVersion = $gitVersion")
 println("LpGVersion = $gitLpVersion")
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '2.5-RC-dev-1'
+def lpMiraiVer = '2.5-RC-dev-2'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {

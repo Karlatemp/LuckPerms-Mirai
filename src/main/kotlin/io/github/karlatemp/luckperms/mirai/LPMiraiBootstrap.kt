@@ -16,6 +16,8 @@ import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import io.github.karlatemp.luckperms.mirai.logging.MiraiPluginLogger
 import io.github.karlatemp.luckperms.mirai.openapi.internal.BackendImpl
+import me.lucko.luckperms.common.config.ConfigKeys
+import me.lucko.luckperms.common.config.generic.key.SimpleConfigKey
 import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap
 import me.lucko.luckperms.common.plugin.classpath.ClassPathAppender
 import me.lucko.luckperms.common.plugin.logging.PluginLogger
@@ -23,7 +25,6 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.extension.PluginComponentStorage
-import net.mamoe.mirai.console.plugin.jvm.JvmPlugin
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import ninja.leaping.configurate.ConfigurationNode
@@ -99,7 +100,7 @@ object LPMiraiBootstrap : KotlinPlugin(
     override fun getStartupTime(): Instant = startupTime0
 
     override fun getType(): Platform.Type {
-        return Platform.Type.BUNGEECORD
+        return Platform.Type.MIRAI_CONSOLE
     }
 
     override fun getServerBrand(): String {
@@ -238,12 +239,15 @@ object LPMiraiBootstrap : KotlinPlugin(
     }
 
     init {
-        Platform.Type::class.java
-            .getDeclaredField("friendlyName")
-            .apply {
-                isAccessible = true
-            }
-            .set(Platform.Type.BUNGEECORD, "Mirai Console")
-
+        ConfigKeys::class.java.getDeclaredField("KEYS").let { keysField ->
+            keysField.isAccessible = true
+            val keys = ConfigKeys.getKeys().toMutableList()
+            var od = keys.maxOf { it.ordinal() } + 1
+            val additions = LPMConfigs::class.java.declaredFields.asSequence().onEach {
+                it.isAccessible = true
+            }.map { it[LPMConfigs] }.mapNotNull { it as? SimpleConfigKey<*> }.toList()
+            additions.forEach { it.setOrdinal(od); od++ }
+            keysField.set(null, keys.also { it.addAll(additions) }.toList())
+        }
     }
 }

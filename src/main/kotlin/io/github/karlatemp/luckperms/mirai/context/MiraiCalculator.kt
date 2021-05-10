@@ -11,6 +11,8 @@
 
 package io.github.karlatemp.luckperms.mirai.context
 
+import io.github.karlatemp.luckperms.mirai.LPMConfigs
+import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
 import net.luckperms.api.context.ContextCalculator
 import net.luckperms.api.context.ContextConsumer
 import net.luckperms.api.context.ContextSet
@@ -29,10 +31,22 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
         return null
     }
 
-    override fun estimatePotentialContexts(): ContextSet = ImmutableContextSet.builder()
-        .add("contract", "user")
-        .add("contract", "group")
-        //.add("contract", "console")
+    @Suppress("ObjectPropertyName")
+    private val _contact
+        get() = if (LPMiraiPlugin.configuration[LPMConfigs.FIX_CONTEXT_TYPO]) {
+            "contact"
+        } else {
+            "contract"
+        }
+
+    override fun estimatePotentialContexts(): ContextSet = estimatePotentialContexts(
+        _contact
+    )
+
+    private fun estimatePotentialContexts(contact: String): ContextSet = ImmutableContextSet.builder()
+        .add(contact, "user")
+        .add(contact, "group")
+        //.add("contact", "console")
 
         .add("type", "user")
         .add("type", "friend")
@@ -50,24 +64,25 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
         .build()
 
     override fun calculate(target: PermitteeId, consumer: ContextConsumer) {
+        val contact = _contact
         when (target) {
             is AbstractPermitteeId -> {
                 when (target) {
                     is AbstractPermitteeId.ExactUser -> {
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     is AbstractPermitteeId.ExactGroup -> {
-                        consumer.accept("contract", "group")
+                        consumer.accept(contact, "group")
                         consumer.accept("type", "group")
                         consumer.accept("group", target.groupId.toString())
                     }
                     is AbstractPermitteeId.AnyMember -> {
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                         consumer.accept("group", target.groupId.toString())
                         consumer.accept("type", "group")
                     }
                     is AbstractPermitteeId.ExactMember -> {
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                         consumer.accept("type", "group")
                         consumer.accept("group", target.groupId.toString())
                         scanMember(target.groupId, target.memberId)?.let { member ->
@@ -77,14 +92,14 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
                     }
                     is AbstractPermitteeId.ExactFriend -> {
                         consumer.accept("type", "friend")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     is AbstractPermitteeId.ExactStranger -> {
                         consumer.accept("type", "stranger")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     is AbstractPermitteeId.ExactGroupTemp -> {
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                         consumer.accept("type", "temp")
                         consumer.accept("group", target.groupId.toString())
                         scanMember(target.groupId, target.memberId)?.let { member ->
@@ -93,38 +108,38 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
                         }
                     }
                     AbstractPermitteeId.AnyGroup -> {
-                        consumer.accept("contract", "group")
+                        consumer.accept(contact, "group")
                     }
                     AbstractPermitteeId.AnyMemberFromAnyGroup -> {
                         consumer.accept("mode", "group")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     AbstractPermitteeId.AnyStranger -> {
                         consumer.accept("mode", "stranger")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     AbstractPermitteeId.AnyFriend -> {
                         consumer.accept("mode", "friend")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     is AbstractPermitteeId.AnyGroupTemp -> {
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                         consumer.accept("mode", "temp")
                         consumer.accept("group", target.groupId.toString())
                     }
                     AbstractPermitteeId.AnyTempFromAnyGroup -> {
                         consumer.accept("mode", "temp")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     AbstractPermitteeId.AnyUser -> {
                         consumer.accept("mode", "user")
-                        consumer.accept("contract", "user")
+                        consumer.accept(contact, "user")
                     }
                     AbstractPermitteeId.AnyContact -> {
                     }
                     AbstractPermitteeId.Console -> {
                         consumer.accept("type", "console")
-                        consumer.accept("contract", "console")
+                        consumer.accept(contact, "console")
                     }
                 }
             }

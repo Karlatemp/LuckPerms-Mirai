@@ -20,6 +20,7 @@ import me.lucko.luckperms.common.calculator.result.TristateResult
 import me.lucko.luckperms.common.locale.TranslationManager
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.sender.SenderFactory
+import me.lucko.luckperms.common.verbose.VerboseCheckTarget
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
@@ -76,7 +77,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
             LPMiraiPlugin.permissionRegistry.offer(node)
             if (sender is ConsoleCommandSender) {
                 LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, "internal/console",
+                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.internal("console"),
                     QueryOptions.nonContextual(), node, TristateResult.of(Tristate.TRUE)
                 )
                 return Tristate.TRUE

@@ -25,7 +25,6 @@ import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
-import me.lucko.luckperms.common.command.CommandResult
 import me.lucko.luckperms.common.command.abstraction.Command
 import me.lucko.luckperms.common.config.generic.adapter.ConfigurationAdapter
 import me.lucko.luckperms.common.dependencies.Dependency
@@ -66,7 +65,6 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlin.collections.ArrayList
 
 @OptIn(ConsoleExperimentalApi::class)
 object LPMiraiPlugin : AbstractLuckPermsPlugin() {
@@ -93,7 +91,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     @OptIn(ExperimentalCommandDescriptors::class)
     override fun registerCommands() {
         val cm = object : CommandManager(this) {
-            override fun preExecute(sender: Sender?, label: String?, arguments: MutableList<String>?): CommandResult? {
+            override fun preExecute(sender: Sender?, label: String?, arguments: MutableList<String>?): Any? {
                 commandCaller.set((sender as WrappedLPSender).real)
                 return null
             }
@@ -284,15 +282,19 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     }
 
     private fun resolveConfig(): Path? {
+        LPMiraiBootstrap.dataFolder.mkdirs()
         val path = this.bootstrap.configDirectory.resolve("luckperms.conf")
         if (!Files.exists(path)) {
             try {
                 MoreFiles.createDirectoriesIfNotExists(this.bootstrap.configDirectory)
-                javaClass.classLoader.getResourceAsStream("luckperms.conf")!!.use { `is` ->
-                    Files.copy(
-                        `is`,
-                        path
-                    )
+                val ccl = javaClass.classLoader
+                Files.newOutputStream(path).buffered().use { output ->
+                    ccl.getResourceAsStream("luckperms-mirai.conf")!!.use { `is` ->
+                        `is`.copyTo(output)
+                    }
+                    ccl.getResourceAsStream("luckperms.conf")!!.use { `is` ->
+                        `is`.copyTo(output)
+                    }
                 }
             } catch (e: IOException) {
                 throw RuntimeException(e)
