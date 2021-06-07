@@ -13,6 +13,7 @@ package io.github.karlatemp.luckperms.mirai
 
 import io.github.karlatemp.luckperms.mirai.cp.RCP
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
+import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import io.github.karlatemp.luckperms.mirai.logging.MiraiPluginLogger
 import io.github.karlatemp.luckperms.mirai.openapi.internal.BackendImpl
@@ -25,6 +26,7 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.extension.PluginComponentStorage
+import net.mamoe.mirai.console.permission.AbstractPermitteeId
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import ninja.leaping.configurate.ConfigurationNode
@@ -150,7 +152,10 @@ object LPMiraiBootstrap : KotlinPlugin(
 
     override fun lookupUniqueId(username: String): Optional<UUID> {
         kotlin.runCatching {
-            return Optional.of(UUID(0, username.toLong()))
+            return Optional.of(UUID(MAGIC_UUID_HIGH_BITS, username.toLong()))
+        }
+        kotlin.runCatching {
+            return Optional.of(AbstractPermitteeId.parseFromString(username).uuid())
         }
         return Optional.empty()
     }
