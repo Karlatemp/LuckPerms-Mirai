@@ -2,6 +2,66 @@
 
 LuckPerms, 经典的权限系统, 已经接入Mirai-Console Permission Service.
 
+View Plugin Site: https://mirai.mamoe.net/topic/68/
+
+----
+
+# Snapshot
+
+![0.png](.images/0.png)
+![1.png](.images/1.png)
+![2.png](.images/2.png)
+![3.png](.images/3.png)
+
+---
+
+# Usages
+
+> LuckPerms-Mirai 基于 LuckPerms 开发, 详细用法请百度/谷歌/阅读 LuckPerms wiki
+
+> [LuckPerms wiki](https://luckperms.net/wiki)
+
+LuckPerms-Mirai 的身份上下文使用 context 实现, 可以在聊天中使用
+`/lp user <****> info` 查看上下文
+
+下面是一些示例命令
+
+```kotlin
+
+// 授予群聊管理员(包含群主)一项权限
+/lp group default permission add AdminPermission admin=true
+
+// 授予群主一条权限
+/lp group default permission add OwnerPermission level=owner
+
+// 授予管理员(不含群主)一条权限
+/lp group default permission add OwnerPermission level=admin
+
+// 授予在某个群的所有人一条权限
+/lp group default permission add PermissionInGroup group=1234567890
+
+// 授予某个群的群聊管理员一条权限
+/lp group default permission add PermissionInGroup group=1234567890 admin=true
+
+
+// 创建系统管理组
+/lp creategroup root
+/lp group root permission add *
+/lp user 1234567890 parent set root
+
+// 开启权限调试模式 (debug(verbose) mode)
+// WARNING: Dont run this command in chatting
+/lp verbose on
+
+// 开启权限调试模式 (debug(verbose) mode), 并在 Web 查看
+/lp verbose record
+//WAIT.....
+/lp verbose upload
+
+```
+
+----
+
 ## 实现细节
 
 对于 Mirai-Console Permission System. Permission有以下内容
