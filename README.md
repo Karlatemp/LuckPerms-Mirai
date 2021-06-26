@@ -29,24 +29,24 @@ LuckPerms-Mirai 的身份上下文使用 context 实现, 可以在聊天中使�
 ```kotlin
 
 // 授予群聊管理员(包含群主)一项权限
-/lp group default permission add AdminPermission admin=true
+/lp group default permission set AdminPermission admin=true
 
 // 授予群主一条权限
-/lp group default permission add OwnerPermission level=owner
+/lp group default permission set OwnerPermission level=owner
 
 // 授予管理员(不含群主)一条权限
-/lp group default permission add OwnerPermission level=admin
+/lp group default permission set OwnerPermission level=admin
 
 // 授予在某个群的所有人一条权限
-/lp group default permission add PermissionInGroup group=1234567890
+/lp group default permission set PermissionInGroup group=1234567890
 
 // 授予某个群的群聊管理员一条权限
-/lp group default permission add PermissionInGroup group=1234567890 admin=true
+/lp group default permission set PermissionInGroup group=1234567890 admin=true
 
 
 // 创建系统管理组
 /lp creategroup root
-/lp group root permission add *
+/lp group root permission set *
 /lp user 1234567890 parent set root
 
 // 开启权限调试模式 (debug(verbose) mode)
