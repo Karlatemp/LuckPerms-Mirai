@@ -1,8 +1,8 @@
 # LuckPerms Mirai
 
-LuckPerms, 经典的权限系统, 已经接入Mirai-Console Permission Service.
-
 View Plugin Site: https://mirai.mamoe.net/topic/68/
+
+> 不支持在 Android 系统上运行
 
 ----
 
