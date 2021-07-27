@@ -194,7 +194,7 @@ index 1c4a2720..c96759bd 100644
      public static List<? extends ConfigKey<?>> getKeys() {
          return KEYS;
 diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
-index 7cbee16a..7f79c2ef 100644
+index 696ec809..444f3d25 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
 @@ -49,6 +49,7 @@ import java.util.Map;
