@@ -213,6 +213,27 @@ index 696ec809..444f3d25 100644
                  repo.download(dependency, file);
                  return file;
              } catch (DependencyDownloadException e) {
+diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java
+index 3606a290..1c756db2 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java
++++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java
+@@ -41,6 +41,16 @@ import java.util.concurrent.TimeUnit;
+  */
+ public enum DependencyRepository {
+ 
++    ALIYUN_MIRROR("https://maven.aliyun.com/repository/public") {
++        @Override
++        protected URLConnection openConnection(Dependency dependency) throws IOException {
++            URLConnection connection = super.openConnection(dependency);
++            connection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(5));
++            connection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(10));
++            return connection;
++        }
++    },
++
+     /**
+      * Maven Central mirror repository.
+      *
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 index f6c51ae5..ddd8ab5c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
