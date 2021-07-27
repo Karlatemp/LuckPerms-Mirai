@@ -11,9 +11,11 @@
 
 package io.github.karlatemp.luckperms.mirai
 
+import io.github.karlatemp.luckperms.mirai.commands.EmergencyOptions
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.util.ChatColor
+import io.github.karlatemp.luckperms.mirai.util.InspectPermissionProcessor
 import io.github.karlatemp.luckperms.mirai.util.colorTranslator
 import kotlinx.coroutines.runBlocking
 import me.lucko.luckperms.common.calculator.result.TristateResult
@@ -81,6 +83,13 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
                     QueryOptions.nonContextual(), node, TristateResult.of(Tristate.TRUE)
                 )
                 return Tristate.TRUE
+            }
+            if (EmergencyOptions.shutdown) {
+                LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
+                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.of("mirai", sender.permitteeId.asString()),
+                    QueryOptions.nonContextual(), node, InspectPermissionProcessor.shutdown
+                )
+                return Tristate.FALSE
             }
             val id = sender.permitteeId
             val data = id.uuid()

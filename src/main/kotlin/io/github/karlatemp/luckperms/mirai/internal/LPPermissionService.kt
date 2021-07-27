@@ -15,8 +15,10 @@
 package io.github.karlatemp.luckperms.mirai.internal
 
 import io.github.karlatemp.luckperms.mirai.*
+import io.github.karlatemp.luckperms.mirai.commands.EmergencyOptions
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.openapi.CustomPermitteeId
+import io.github.karlatemp.luckperms.mirai.util.InspectPermissionProcessor
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache
 import me.lucko.luckperms.common.calculator.result.TristateResult
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget
@@ -250,6 +252,13 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             permission.internalId.logConsole()
             return true
         }
+        if (EmergencyOptions.shutdown) {
+            LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
+                PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.of("mirai", permitteeId.asString()),
+                QueryOptions.nonContextual(), permission.internalId, InspectPermissionProcessor.shutdown
+            )
+            return false
+        }
         val user = permitteeId.uuid()
         val usr = LPMiraiPlugin.userManager.getIfLoaded(user) ?: kotlin.run {
             LPMiraiBootstrap.logger.error("WARMING: User $user{lnum=${user.leastSignificantBits}} not loaded. Please report to https://github.com/Karlatemp/LuckPerms-Mirai")
@@ -285,7 +294,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         }
         LPMiraiPlugin.permissionRegistry.offer(permission.internalId)
         val perm =
-            permissionData.checkPermission(permission.internalId, PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK)
+            permissionData.checkPermission(permission.internalId, PermissionCheckEvent.Origin.THIRD_PARTY_API)
         DebugKit.log { "Testing ${permission.internalId} -> ${perm.result()}" }
         if (perm.result() == Tristate.UNDEFINED) {
             val pp = permission.parentPermission

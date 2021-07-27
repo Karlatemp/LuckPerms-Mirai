@@ -14,6 +14,7 @@
 package io.github.karlatemp.luckperms.mirai
 
 
+import io.github.karlatemp.luckperms.mirai.commands.Emergency
 import io.github.karlatemp.luckperms.mirai.commands.SwitchDebugCommand
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
@@ -194,6 +195,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
 
                     }
                 })
+                commands.add(Emergency)
 
                 if (BuiltInCommands.PermissionCommand.unregister()) {
                     object : RawCommand(
