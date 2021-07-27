@@ -12,6 +12,7 @@
 package io.github.karlatemp.luckperms.mirai
 
 import io.github.karlatemp.luckperms.mirai.commands.EmergencyOptions
+import io.github.karlatemp.luckperms.mirai.gui.guiSender
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.util.ChatColor
@@ -48,7 +49,11 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
     }
 
     public override fun sendMessage(sender: Permittee, message: Component) {
-        sendMessage(sender, LegacyComponentSerializer.legacySection().serialize(TranslationManager.render(message)))
+        val trd = TranslationManager.render(message)
+        sendMessage(sender, LegacyComponentSerializer.legacySection().serialize(trd))
+        if (sender is ConsoleCommandSender) {
+            guiSender.sendMsg(trd)
+        }
     }
 
     fun sendMessage(sender: Permittee, message: String) {
@@ -86,8 +91,11 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
             }
             if (EmergencyOptions.shutdown) {
                 LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.of("mirai", sender.permitteeId.asString()),
-                    QueryOptions.nonContextual(), node, InspectPermissionProcessor.shutdown
+                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK,
+                    VerboseCheckTarget.of("mirai", sender.permitteeId.asString()),
+                    QueryOptions.nonContextual(),
+                    node,
+                    InspectPermissionProcessor.shutdown
                 )
                 return Tristate.FALSE
             }

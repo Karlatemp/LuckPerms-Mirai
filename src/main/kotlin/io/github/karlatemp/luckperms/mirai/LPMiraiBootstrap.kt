@@ -12,6 +12,7 @@
 package io.github.karlatemp.luckperms.mirai
 
 import io.github.karlatemp.luckperms.mirai.cp.RCP
+import io.github.karlatemp.luckperms.mirai.gui.guiSender
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
@@ -31,6 +32,7 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import ninja.leaping.configurate.ConfigurationNode
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
+import java.io.Closeable
 import java.io.InputStream
 import java.lang.invoke.MethodHandles
 import java.nio.file.Path
@@ -232,6 +234,7 @@ object LPMiraiBootstrap : KotlinPlugin(
         }
 
         LPMiraiPlugin.disable()
+        (guiSender as? Closeable)?.close()
     }
 
     private fun checkIncompatibleVersion(): Boolean {

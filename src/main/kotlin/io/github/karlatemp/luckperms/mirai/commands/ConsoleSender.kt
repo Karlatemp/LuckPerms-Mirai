@@ -37,4 +37,6 @@ object ConsoleSender : Sender {
     override fun performCommand(commandLine: String) {
         LPMiraiPlugin.senderFactory0.performCommand(console, commandLine)
     }
+
+    override fun isHoverEventSupported(): Boolean = true
 }

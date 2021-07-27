@@ -12,6 +12,7 @@
 package io.github.karlatemp.luckperms.mirai.commands
 
 import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
+import io.github.karlatemp.luckperms.mirai.gui.guiSender
 import me.lucko.luckperms.common.command.access.CommandPermission
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
@@ -21,7 +22,6 @@ import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.ConsoleCommandSender
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.collections.ArrayList
 
 open class WrappedLPSender(
     val delegate: Sender,
@@ -36,6 +36,8 @@ open class WrappedLPSender(
         override fun sendMessage(message: Component?) {
             ConsoleSender.sendMessage(message ?: return)
         }
+
+        override fun isHoverEventSupported(): Boolean = guiSender.isSupported
     }
 
     companion object {
@@ -98,4 +100,6 @@ open class WrappedLPSender(
             writingLock.set(false)
         }
     }
+
+    override fun isHoverEventSupported(): Boolean = delegate.isHoverEventSupported
 }

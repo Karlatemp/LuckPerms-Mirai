@@ -19,6 +19,8 @@ import io.github.karlatemp.luckperms.mirai.commands.SwitchDebugCommand
 import io.github.karlatemp.luckperms.mirai.commands.WrappedLPSender
 import io.github.karlatemp.luckperms.mirai.context.MiraiCalculator
 import io.github.karlatemp.luckperms.mirai.context.MiraiContextManager
+import io.github.karlatemp.luckperms.mirai.gui.GuiControlCommand
+import io.github.karlatemp.luckperms.mirai.gui.guiSender
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK
@@ -84,6 +86,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
         this.userManager0 = StandardUserManager(this)
         this.groupManager0 = StandardGroupManager(this)
         this.trackManager0 = StandardTrackManager(this)
+        guiSender
     }
 
     private lateinit var commandManager0: CommandManager
@@ -196,6 +199,9 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
                     }
                 })
                 commands.add(Emergency)
+                if (guiSender.isSupported) {
+                    commands.add(GuiControlCommand)
+                }
 
                 if (BuiltInCommands.PermissionCommand.unregister()) {
                     object : RawCommand(

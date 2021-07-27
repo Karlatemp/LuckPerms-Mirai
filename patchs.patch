@@ -268,10 +268,10 @@ index 2680ab00..c904d6fb 100644
 +    // LuckPerms Mirai - End
  }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
-index 92d177e1..754e615b 100644
+index 92d177e1..1edb628c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
-@@ -160,4 +160,10 @@ public interface Sender {
+@@ -160,4 +160,12 @@ public interface Sender {
          return true;
      }
  
@@ -281,7 +281,22 @@ index 92d177e1..754e615b 100644
 +     * For LuckPerms-Mirai
 +     */
 +    default void flush() {}
++
++    default boolean isHoverEventSupported() { return false; }
  }
+diff --git a/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java b/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
+index 8d942b90..dd70c6eb 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
++++ b/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
+@@ -150,7 +150,7 @@ public class VerboseListener {
+     }
+ 
+     private void sendNotification(VerboseEvent event) {
+-        if (this.notifiedSender.isConsole()) {
++        if (!this.notifiedSender.isHoverEventSupported()) {
+             // just send as a raw message
+             if (event instanceof PermissionCheckEvent) {
+                 PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
 diff --git a/settings.gradle b/settings.gradle
 index 37f93867..00680e6e 100644
 --- a/settings.gradle
