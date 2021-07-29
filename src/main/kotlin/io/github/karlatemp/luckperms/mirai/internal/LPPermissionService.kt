@@ -153,6 +153,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         if (internalId.toLowerCase().startsWith("<lp>")) {
             throw IllegalArgumentException("Cannot register `$internalId`: Protected domain: <lp>")
         }
+        if (parent === Magic_CONSOLE_ONLY) return parent
         val base = parent as LuckPermsPermission
         val perm = LuckPermsPermission(
             base, description, id, internalId, when (base) {
@@ -295,6 +296,8 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         permission: LuckPermsPermission
     ): Boolean {
         if (permission === Magic_NO_PERMISSION_CHECK) return true
+        // ?????????
+        if (permission === Magic_CONSOLE_ONLY) return false
         // It should be discarded at #register
         if (permission === Magic_NO_REGISTER_CHECK) {
             LPMiraiPlugin.logger.severe("Error: Oops. LuckPerms Mirai got a logic error.")
