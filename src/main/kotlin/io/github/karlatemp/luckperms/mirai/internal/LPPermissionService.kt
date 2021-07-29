@@ -150,6 +150,9 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         if (internalId == "*") {
             return ROOT
         }
+        if (internalId.toLowerCase().startsWith("<lp>")) {
+            throw IllegalArgumentException("Cannot register `$internalId`: Protected domain: <lp>")
+        }
         val base = parent as LuckPermsPermission
         val perm = LuckPermsPermission(
             base, description, id, internalId, when (base) {
