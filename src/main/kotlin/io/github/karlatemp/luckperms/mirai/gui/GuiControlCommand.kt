@@ -12,7 +12,7 @@
 package io.github.karlatemp.luckperms.mirai.gui
 
 import io.github.karlatemp.luckperms.mirai.LPMiraiBootstrap
-import io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK
+import io.github.karlatemp.luckperms.mirai.internal.Magic_CONSOLE_ONLY
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.ConsoleCommandSender
@@ -20,7 +20,7 @@ import net.mamoe.mirai.console.permission.Permission
 
 @Suppress("unused")
 object GuiControlCommand : CompositeCommand(LPMiraiBootstrap, "lpg") {
-    override val permission: Permission get() = Magic_NO_PERMISSION_CHECK
+    override val permission: Permission get() = Magic_CONSOLE_ONLY
 
     @SubCommand
     fun CommandSender.clear() {
