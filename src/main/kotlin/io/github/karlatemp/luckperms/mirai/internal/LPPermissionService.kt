@@ -96,6 +96,16 @@ internal object Magic_NO_REGISTER_CHECK : LuckPermsPermission(
     }
 }
 
+internal object Magic_CONSOLE_ONLY : LuckPermsPermission(
+    ROOT, "Magic permission that only console permit",
+    PermissionId("<lp>","<console>"),
+    "<lp>.<console>", null
+) {
+    override fun toString(): String {
+        return "Magic[Console only]"
+    }
+}
+
 internal object LPPermissionService : PermissionService<LuckPermsPermission> {
     private val permissions = ConcurrentHashMap<String, LuckPermsPermission>()
 
@@ -107,6 +117,8 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         permissions["<lp>.#"] = Magic_NO_REGISTER_CHECK
         permissions["<lp>.%"] = Magic_NO_PERMISSION_CHECK
         permissions["<lp>.<void>"] = Magic_NO_PERMISSION_CHECK
+        permissions["<lp>.<console>"] = Magic_CONSOLE_ONLY
+        permissions["<lp>.<system>"] = Magic_CONSOLE_ONLY
     }
 
 
@@ -252,6 +264,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
             permission.internalId.logConsole()
             return true
         }
+        if (permission === Magic_CONSOLE_ONLY) return false
         if (EmergencyOptions.shutdown) {
             LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
                 PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.of("mirai", permitteeId.asString()),

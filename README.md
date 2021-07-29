@@ -96,6 +96,7 @@ LuckPerms Mirai 提供了一些特别的权限节点(权限ID), `namespace:id` �
   - `<lp>.<void>` 与 `<lp>.%` 拥有相同效果
 - 对于 `namespace:`(`PermissionId(namespace, "")`),
   LuckPerms-Mirai 会识别成 `namespace` 而不是 `namespace.`
+- 对于 `<lp>.<console>`, 只有控制台拥有该权限, 将执行权限设置成 `<lp>.<console>` 可确保只有 Console 可执行
 - PermissionService#register
     - 对于 parentId为 `<lp>:#` 的权限,
       LuckPerms-Mirai 将直接提供权限节点并不进行任何注册检查,
