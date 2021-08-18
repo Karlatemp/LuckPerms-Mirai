@@ -15,6 +15,12 @@ View Plugin Site: https://mirai.mamoe.net/topic/68/
 
 ---
 
+# Install
+
+Way 1. By MCL: `mcl --update-package io.github.karlatemp:luckperms --channel nightly --type plugin`
+
+Way 2. Download release from [Releases](https://github.com/Karlatemp/LuckPerms-Mirai/releases/latest). Then put it into `plugins`
+
 # Usages
 
 > LuckPerms-Mirai 基于 LuckPerms 开发, 详细用法请百度/谷歌/阅读 LuckPerms wiki
