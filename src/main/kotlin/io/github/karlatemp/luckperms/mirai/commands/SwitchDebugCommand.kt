@@ -11,6 +11,8 @@
 
 package io.github.karlatemp.luckperms.mirai.commands
 
+import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
+import io.github.karlatemp.luckperms.mirai.internal.LuckPermsPermission
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.util.newLine
@@ -22,6 +24,9 @@ import me.lucko.luckperms.common.command.utils.ArgumentList
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.util.Predicates
+import net.mamoe.mirai.console.permission.AbstractPermitteeId
+import net.mamoe.mirai.console.permission.PermissionId
+import net.mamoe.mirai.console.permission.PermitteeId
 
 internal object SwitchDebugCommand : SingleCommand(
     CommandSpec.LPM_DEBUG,
@@ -110,6 +115,13 @@ internal object SwitchDebugCommand : SingleCommand(
             "logger" -> {
                 DebugKit.isDebugEnabled = !DebugKit.isDebugEnabled
                 sender.sendmsg("Debug mode switch to ${DebugKit.isDebugEnabled}")
+            }
+            "check" -> {
+                val userId = args.getOrDefault(1, null) ?: return
+                val perm = args.getOrDefault(2, null) ?: return
+                val pid = AbstractPermitteeId.parseFromString(userId)
+                val rsp = LPPermissionService.testPermission(pid, LuckPermsPermission.of(perm))
+                sender.sendmsg("$perm -> $userId: $rsp")
             }
         }
     }

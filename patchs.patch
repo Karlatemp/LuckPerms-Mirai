@@ -27,10 +27,10 @@ index d19884c7..1c5d918c 100644
      }
  
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-index dbb9da18..15739672 100644
+index e9d20622..7df417f9 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-@@ -84,6 +84,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -85,6 +85,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  import java.util.concurrent.atomic.AtomicReference;
  import java.util.function.Function;
  import java.util.stream.Collectors;
@@ -38,7 +38,7 @@ index dbb9da18..15739672 100644
  
  /**
   * Root command manager for the '/luckperms' command.
-@@ -103,7 +104,7 @@ public class CommandManager {
+@@ -104,7 +105,7 @@ public class CommandManager {
      public CommandManager(LuckPermsPlugin plugin) {
          this.plugin = plugin;
          this.tabCompletions = new TabCompletions(plugin);
@@ -47,13 +47,13 @@ index dbb9da18..15739672 100644
                  .add(new UserParentCommand())
                  .add(new GroupParentCommand())
                  .add(new TrackParentCommand())
-@@ -129,14 +130,28 @@ public class CommandManager {
+@@ -130,14 +131,28 @@ public class CommandManager {
                  .add(new DeleteTrack())
                  .add(new ListTracks())
                  .build()
 -                .stream()
 +                .stream(),injectedCommands())
-                 .collect(ImmutableCollectors.toMap(c -> c.getName().toLowerCase(), Function.identity()));
+                 .collect(ImmutableCollectors.toMap(c -> c.getName().toLowerCase(Locale.ROOT), Function.identity()));
      }
  
 +    protected Stream<Command<?>> injectedCommands() {
@@ -77,7 +77,7 @@ index dbb9da18..15739672 100644
      public TabCompletions getTabCompletions() {
          return this.tabCompletions;
      }
-@@ -207,10 +222,25 @@ public class CommandManager {
+@@ -208,10 +223,25 @@ public class CommandManager {
      }
  
      private void execute(Sender sender, String label, List<String> arguments) {
@@ -103,7 +103,7 @@ index dbb9da18..15739672 100644
              sender.sendMessage(Message.prefixed(Component.text()
                      .color(NamedTextColor.DARK_GREEN)
                      .append(Component.text("Running "))
-@@ -220,16 +250,21 @@ public class CommandManager {
+@@ -221,16 +251,21 @@ public class CommandManager {
                      .append(Message.FULL_STOP)
              ));
  
@@ -128,7 +128,7 @@ index dbb9da18..15739672 100644
              }
              return;
          }
-@@ -287,14 +322,6 @@ public class CommandManager {
+@@ -288,14 +323,6 @@ public class CommandManager {
      }
  
      private void sendCommandUsage(Sender sender, String label) {
@@ -156,10 +156,10 @@ index 606c4b79..b6f8a3d4 100644
      SYNC("sync", Type.NONE),
      INFO("info", Type.NONE),
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
-index ebf9f665..5b962955 100644
+index fe5a9740..2a1e7803 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
-@@ -37,6 +37,7 @@ import java.util.List;
+@@ -38,6 +38,7 @@ import java.util.Locale;
   */
  @SuppressWarnings("SpellCheckingInspection")
  public enum CommandSpec {
@@ -168,10 +168,10 @@ index ebf9f665..5b962955 100644
      USER("/%s user <user>"),
      GROUP("/%s group <group>"),
 diff --git a/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java b/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
-index 3542ca1a..fa5432a3 100644
+index 459003b4..7821b69c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
-@@ -106,6 +106,8 @@ public class EditorCommand extends SingleCommand {
+@@ -107,6 +107,8 @@ public class EditorCommand extends SingleCommand {
  
          Message.EDITOR_START.send(sender);
  
@@ -181,10 +181,10 @@ index 3542ca1a..fa5432a3 100644
                  .createSession(plugin, sender);
      }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java b/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java
-index 1c4a2720..c96759bd 100644
+index 1aa8d32e..1e12221e 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java
-@@ -690,7 +690,7 @@ public final class ConfigKeys {
+@@ -691,7 +691,7 @@ public final class ConfigKeys {
      /**
       * A list of the keys defined in this class.
       */

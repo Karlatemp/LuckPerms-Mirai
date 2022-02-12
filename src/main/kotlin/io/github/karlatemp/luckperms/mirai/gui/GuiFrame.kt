@@ -11,7 +11,6 @@
 
 package io.github.karlatemp.luckperms.mirai.gui
 
-import kotlinx.atomicfu.locks.withLock
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.flattener.ComponentFlattener
 import net.kyori.adventure.text.flattener.FlattenerListener
@@ -29,6 +28,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 import javax.swing.*
+import kotlin.concurrent.withLock
 import net.kyori.adventure.text.Component as AdvTextComponent
 
 class GuiFrame : JFrame("LuckPerms - MessageLog"), GuiSender, Closeable {

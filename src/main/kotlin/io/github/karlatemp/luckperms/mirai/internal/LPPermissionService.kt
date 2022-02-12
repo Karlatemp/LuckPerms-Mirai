@@ -48,6 +48,15 @@ internal open class LuckPermsPermission(
     override fun toString(): String {
         return "<$internalId>"
     }
+
+    internal companion object {
+        fun of(text: String): LuckPermsPermission {
+            return LuckPermsPermission(
+                ROOT, "", PermissionId("a", "b"),
+                text, null
+            )
+        }
+    }
 }
 
 internal object TempPermissionInitPlaceholder : Permission {
@@ -98,7 +107,7 @@ internal object Magic_NO_REGISTER_CHECK : LuckPermsPermission(
 
 internal object Magic_CONSOLE_ONLY : LuckPermsPermission(
     ROOT, "Magic permission that only console permit",
-    PermissionId("<lp>","<console>"),
+    PermissionId("<lp>", "<console>"),
     "<lp>.<console>", null
 ) {
     override fun toString(): String {
@@ -271,8 +280,11 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         if (permission === Magic_CONSOLE_ONLY) return false
         if (EmergencyOptions.shutdown) {
             LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-                PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.of("mirai", permitteeId.asString()),
-                QueryOptions.nonContextual(), permission.internalId, InspectPermissionProcessor.shutdown
+                PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK,
+                VerboseCheckTarget.of("mirai", permitteeId.asString()),
+                QueryOptions.nonContextual(),
+                permission.internalId,
+                InspectPermissionProcessor.shutdown
             )
             return false
         }

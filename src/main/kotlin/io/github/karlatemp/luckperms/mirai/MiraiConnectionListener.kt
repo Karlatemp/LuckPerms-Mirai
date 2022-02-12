@@ -17,6 +17,8 @@ import net.mamoe.mirai.event.EventPriority
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.message.data.At
+import net.mamoe.mirai.utils.debug
+import net.mamoe.mirai.utils.info
 import java.util.*
 
 class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
@@ -42,12 +44,14 @@ class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
     internal fun loadInternalUsers() {
         fun rec(uid: UUID, name: String) {
             // UUID_ANY_MEMBER_SELECTOR
-            val loaded = LPMiraiPlugin.apiProvider.userManager.getUser(uid)
+            val loaded = LPMiraiPlugin.userManager.getIfLoaded(uid)
             if (loaded == null) {
                 loadUser(uid, name)
                 recordConnection(uid)
+                LPMiraiBootstrap.logger.debug { "Registered $name with $uid" }
             }
         }
+        LPMiraiBootstrap.logger.info { "Registering internal users...." }
         rec(UUID_ANY_MEMBER_SELECTOR, "MemberSelector")
         rec(UUID_ANY_GROUP_SELECTOR, "GroupSelector")
         rec(UUID_ANY_CONTEXT_SELECTOR, "ContextSelector")
