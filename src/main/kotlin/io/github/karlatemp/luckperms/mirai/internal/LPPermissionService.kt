@@ -19,9 +19,10 @@ import io.github.karlatemp.luckperms.mirai.commands.EmergencyOptions
 import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import io.github.karlatemp.luckperms.mirai.openapi.CustomPermitteeId
 import io.github.karlatemp.luckperms.mirai.util.InspectPermissionProcessor
+import me.lucko.luckperms.common.cacheddata.result.TristateResult
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache
-import me.lucko.luckperms.common.calculator.result.TristateResult
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget
+import me.lucko.luckperms.common.verbose.event.CheckOrigin
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
 import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
@@ -254,8 +255,8 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
 
     private fun String.logConsole() {
         LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-            PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.internal("console"),
-            QueryOptions.nonContextual(), this, TristateResult.of(Tristate.TRUE)
+            CheckOrigin.PLATFORM_API_HAS_PERMISSION, VerboseCheckTarget.internal("console"),
+            QueryOptions.nonContextual(), this, TristateResult.forMonitoredResult(Tristate.TRUE)
         )
         LPMiraiPlugin.permissionRegistry.offer(this)
     }
@@ -280,7 +281,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         if (permission === Magic_CONSOLE_ONLY) return false
         if (EmergencyOptions.shutdown) {
             LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-                PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK,
+                CheckOrigin.PLATFORM_API_HAS_PERMISSION,
                 VerboseCheckTarget.of("mirai", permitteeId.asString()),
                 QueryOptions.nonContextual(),
                 permission.internalId,
@@ -325,7 +326,7 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         }
         LPMiraiPlugin.permissionRegistry.offer(permission.internalId)
         val perm =
-            permissionData.checkPermission(permission.internalId, PermissionCheckEvent.Origin.THIRD_PARTY_API)
+            permissionData.checkPermission(permission.internalId, CheckOrigin.THIRD_PARTY_API)
         DebugKit.log { "Testing ${permission.internalId} -> ${perm.result()}" }
         if (perm.result() == Tristate.UNDEFINED) {
             val pp = permission.parentPermission

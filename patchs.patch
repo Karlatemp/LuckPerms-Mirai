@@ -1,5 +1,5 @@
 diff --git a/api/src/main/java/net/luckperms/api/platform/Platform.java b/api/src/main/java/net/luckperms/api/platform/Platform.java
-index 9ed38bee..5e64324e 100644
+index 9ed38beee..5e64324ed 100644
 --- a/api/src/main/java/net/luckperms/api/platform/Platform.java
 +++ b/api/src/main/java/net/luckperms/api/platform/Platform.java
 @@ -75,7 +75,8 @@ public interface Platform {
@@ -13,7 +13,7 @@ index 9ed38bee..5e64324e 100644
          private final String friendlyName;
  
 diff --git a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java b/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
-index d19884c7..1c5d918c 100644
+index d19884c76..1c5d918c2 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/api/implementation/ApiPlatform.java
 @@ -52,7 +52,8 @@ public class ApiPlatform implements Platform, PluginMetadata {
@@ -27,10 +27,10 @@ index d19884c7..1c5d918c 100644
      }
  
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-index e9d20622..7df417f9 100644
+index 3443eff42..7a141ebc7 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/CommandManager.java
-@@ -85,6 +85,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -86,6 +86,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  import java.util.concurrent.atomic.AtomicReference;
  import java.util.function.Function;
  import java.util.stream.Collectors;
@@ -38,7 +38,7 @@ index e9d20622..7df417f9 100644
  
  /**
   * Root command manager for the '/luckperms' command.
-@@ -104,7 +105,7 @@ public class CommandManager {
+@@ -105,7 +106,7 @@ public class CommandManager {
      public CommandManager(LuckPermsPlugin plugin) {
          this.plugin = plugin;
          this.tabCompletions = new TabCompletions(plugin);
@@ -47,7 +47,7 @@ index e9d20622..7df417f9 100644
                  .add(new UserParentCommand())
                  .add(new GroupParentCommand())
                  .add(new TrackParentCommand())
-@@ -130,14 +131,28 @@ public class CommandManager {
+@@ -132,14 +133,28 @@ public class CommandManager {
                  .add(new DeleteTrack())
                  .add(new ListTracks())
                  .build()
@@ -77,7 +77,7 @@ index e9d20622..7df417f9 100644
      public TabCompletions getTabCompletions() {
          return this.tabCompletions;
      }
-@@ -208,10 +223,25 @@ public class CommandManager {
+@@ -210,10 +225,25 @@ public class CommandManager {
      }
  
      private void execute(Sender sender, String label, List<String> arguments) {
@@ -103,7 +103,7 @@ index e9d20622..7df417f9 100644
              sender.sendMessage(Message.prefixed(Component.text()
                      .color(NamedTextColor.DARK_GREEN)
                      .append(Component.text("Running "))
-@@ -221,16 +251,21 @@ public class CommandManager {
+@@ -223,16 +253,21 @@ public class CommandManager {
                      .append(Message.FULL_STOP)
              ));
  
@@ -128,7 +128,7 @@ index e9d20622..7df417f9 100644
              }
              return;
          }
-@@ -288,14 +323,6 @@ public class CommandManager {
+@@ -290,14 +325,6 @@ public class CommandManager {
      }
  
      private void sendCommandUsage(Sender sender, String label) {
@@ -144,7 +144,7 @@ index e9d20622..7df417f9 100644
          this.mainCommands.values().stream()
                  .filter(Command::shouldDisplay)
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java b/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java
-index 606c4b79..b6f8a3d4 100644
+index dfb5efc3a..3657be6eb 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/access/CommandPermission.java
 @@ -31,6 +31,7 @@ import me.lucko.luckperms.common.sender.Sender;
@@ -156,7 +156,7 @@ index 606c4b79..b6f8a3d4 100644
      SYNC("sync", Type.NONE),
      INFO("info", Type.NONE),
 diff --git a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
-index fe5a9740..2a1e7803 100644
+index f749a3117..44740004f 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/command/spec/CommandSpec.java
 @@ -38,6 +38,7 @@ import java.util.Locale;
@@ -168,23 +168,23 @@ index fe5a9740..2a1e7803 100644
      USER("/%s user <user>"),
      GROUP("/%s group <group>"),
 diff --git a/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java b/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
-index 459003b4..7821b69c 100644
+index 46ac1698d..166e2fbf9 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/commands/misc/EditorCommand.java
-@@ -107,6 +107,8 @@ public class EditorCommand extends SingleCommand {
+@@ -108,6 +108,8 @@ public class EditorCommand extends SingleCommand {
  
          Message.EDITOR_START.send(sender);
  
 +        sender.flush();
 +
-         WebEditorRequest.generate(holders, tracks, sender, label, plugin)
-                 .createSession(plugin, sender);
+         WebEditorSession.createAndOpen(holders, tracks, sender, label, plugin);
      }
+ 
 diff --git a/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java b/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java
-index 1aa8d32e..1e12221e 100644
+index 38a228a41..9affcb214 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/config/ConfigKeys.java
-@@ -691,7 +691,7 @@ public final class ConfigKeys {
+@@ -718,7 +718,7 @@ public final class ConfigKeys {
      /**
       * A list of the keys defined in this class.
       */
@@ -194,7 +194,7 @@ index 1aa8d32e..1e12221e 100644
      public static List<? extends ConfigKey<?>> getKeys() {
          return KEYS;
 diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
-index 696ec809..444f3d25 100644
+index 696ec8094..444f3d25c 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyManager.java
 @@ -49,6 +49,7 @@ import java.util.Map;
@@ -214,7 +214,7 @@ index 696ec809..444f3d25 100644
                  return file;
              } catch (DependencyDownloadException e) {
 diff --git a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java
-index 3606a290..1c756db2 100644
+index 3606a2906..1c756db22 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/dependencies/DependencyRepository.java
 @@ -41,6 +41,16 @@ import java.util.concurrent.TimeUnit;
@@ -235,10 +235,10 @@ index 3606a290..1c756db2 100644
       * Maven Central mirror repository.
       *
 diff --git a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-index f6c51ae5..ddd8ab5c 100644
+index 0be4e97e1..bf66ed15d 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/locale/Message.java
-@@ -1347,8 +1347,7 @@ public interface Message {
+@@ -1576,8 +1576,7 @@ public interface Message {
                      .append(text(':'))),
              prefixed(text()
                      .color(WHITE)
@@ -249,7 +249,7 @@ index f6c51ae5..ddd8ab5c 100644
                      .color(AQUA)
                      .append(text("-  ", WHITE))
 diff --git a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
-index 2680ab00..c904d6fb 100644
+index 2680ab00e..c904d6fbd 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
 @@ -230,4 +230,14 @@ public interface LuckPermsBootstrap {
@@ -268,7 +268,7 @@ index 2680ab00..c904d6fb 100644
 +    // LuckPerms Mirai - End
  }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
-index 92d177e1..1edb628c 100644
+index a4287a7d0..df176f333 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/sender/Sender.java
 @@ -160,4 +160,12 @@ public interface Sender {
@@ -285,23 +285,31 @@ index 92d177e1..1edb628c 100644
 +    default boolean isHoverEventSupported() { return false; }
  }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java b/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
-index 8d942b90..dd70c6eb 100644
+index 22c082368..063585fce 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
 +++ b/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
-@@ -150,7 +150,7 @@ public class VerboseListener {
-     }
+@@ -174,7 +174,7 @@ public class VerboseListener {
+         }
  
-     private void sendNotification(VerboseEvent event) {
+         // just send as a raw message
 -        if (this.notifiedSender.isConsole()) {
 +        if (!this.notifiedSender.isHoverEventSupported()) {
-             // just send as a raw message
-             if (event instanceof PermissionCheckEvent) {
-                 PermissionCheckEvent permissionEvent = (PermissionCheckEvent) event;
+             this.notifiedSender.sendMessage(component);
+             return;
+         }
 diff --git a/settings.gradle b/settings.gradle
-index 37f93867..00680e6e 100644
+index db3bdea62..b88ed5914 100644
 --- a/settings.gradle
 +++ b/settings.gradle
-@@ -14,15 +14,4 @@ include (
+@@ -1,7 +1,6 @@
+ // Fabric Needs this
+ pluginManagement {
+     repositories {
+-        jcenter()
+         maven {
+             url 'https://maven.fabricmc.net/'
+         }
+@@ -14,15 +13,4 @@ include (
          'api',
          'common',
          'common:loader-utils',
@@ -314,6 +322,6 @@ index 37f93867..00680e6e 100644
 -        'fabric',
 -        'nukkit',
 -        'nukkit:loader',
--        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api6', 'sponge:sponge-service-api7',
+-        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api8',
 -        'velocity'
  )

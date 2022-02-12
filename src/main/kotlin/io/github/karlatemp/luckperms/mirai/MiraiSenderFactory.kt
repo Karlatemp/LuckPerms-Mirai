@@ -19,11 +19,12 @@ import io.github.karlatemp.luckperms.mirai.util.ChatColor
 import io.github.karlatemp.luckperms.mirai.util.InspectPermissionProcessor
 import io.github.karlatemp.luckperms.mirai.util.colorTranslator
 import kotlinx.coroutines.runBlocking
-import me.lucko.luckperms.common.calculator.result.TristateResult
+import me.lucko.luckperms.common.cacheddata.result.TristateResult
 import me.lucko.luckperms.common.locale.TranslationManager
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.sender.SenderFactory
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget
+import me.lucko.luckperms.common.verbose.event.CheckOrigin
 import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
@@ -84,14 +85,14 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
             LPMiraiPlugin.permissionRegistry.offer(node)
             if (sender is ConsoleCommandSender) {
                 LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, VerboseCheckTarget.internal("console"),
-                    QueryOptions.nonContextual(), node, TristateResult.of(Tristate.TRUE)
+                    CheckOrigin.INTERNAL, VerboseCheckTarget.internal("console"),
+                    QueryOptions.nonContextual(), node, TristateResult.forMonitoredResult(Tristate.TRUE)
                 )
                 return Tristate.TRUE
             }
             if (EmergencyOptions.shutdown) {
                 LPMiraiPlugin.verboseHandler.offerPermissionCheckEvent(
-                    PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK,
+                    CheckOrigin.INTERNAL,
                     VerboseCheckTarget.of("mirai", sender.permitteeId.asString()),
                     QueryOptions.nonContextual(),
                     node,
@@ -108,7 +109,7 @@ class MiraiSenderFactory : SenderFactory<LPMiraiPlugin, Permittee>(
             return usr.cachedData.getPermissionData(options)
                 .checkPermission(
                     node,
-                    PermissionCheckEvent.Origin.PLATFORM_LOOKUP_CHECK
+                    CheckOrigin.PLATFORM_API_HAS_PERMISSION
                 )
                 .result()
         }

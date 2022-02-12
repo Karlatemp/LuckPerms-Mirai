@@ -14,8 +14,8 @@ package io.github.karlatemp.luckperms.mirai.context
 import com.github.benmanes.caffeine.cache.LoadingCache
 import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
-import me.lucko.luckperms.common.context.ContextManager
-import me.lucko.luckperms.common.context.QueryOptionsSupplier
+import me.lucko.luckperms.common.context.manager.ContextManager
+import me.lucko.luckperms.common.context.manager.QueryOptionsSupplier
 import me.lucko.luckperms.common.util.CaffeineFactory
 import net.luckperms.api.context.ImmutableContextSet
 import net.luckperms.api.query.QueryOptions
