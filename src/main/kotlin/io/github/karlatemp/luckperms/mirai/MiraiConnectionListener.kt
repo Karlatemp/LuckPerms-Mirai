@@ -51,7 +51,6 @@ class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
                 LPMiraiBootstrap.logger.debug { "Registered $name with $uid" }
             }
         }
-        LPMiraiBootstrap.logger.info { "Registering internal users...." }
         rec(UUID_ANY_MEMBER_SELECTOR, "MemberSelector")
         rec(UUID_ANY_GROUP_SELECTOR, "GroupSelector")
         rec(UUID_ANY_CONTEXT_SELECTOR, "ContextSelector")

@@ -62,6 +62,7 @@ import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.message.data.*
+import net.mamoe.mirai.utils.info
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -356,6 +357,7 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     }
 
     override fun performFinalSetup() {
+        LPMiraiBootstrap.logger.info { "Registering internal users...." }
         connectionListener0.loadInternalUsers()
     }
 }
