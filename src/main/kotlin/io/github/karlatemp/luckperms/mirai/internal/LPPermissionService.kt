@@ -23,12 +23,12 @@ import me.lucko.luckperms.common.cacheddata.result.TristateResult
 import me.lucko.luckperms.common.cacheddata.type.PermissionCache
 import me.lucko.luckperms.common.verbose.VerboseCheckTarget
 import me.lucko.luckperms.common.verbose.event.CheckOrigin
-import me.lucko.luckperms.common.verbose.event.PermissionCheckEvent
 import net.luckperms.api.query.QueryOptions
 import net.luckperms.api.util.Tristate
 import net.mamoe.mirai.console.extensions.PermissionServiceProvider
 import net.mamoe.mirai.console.permission.*
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.utils.debug
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -298,7 +298,21 @@ internal object LPPermissionService : PermissionService<LuckPermsPermission> {
         val permissionData = usr.cachedData.getPermissionData(
             LPMiraiPlugin.contextManager.getQueryOptions(permitteeId)
         )
-        DebugKit.log { "UUID $user with lnum ${user.leastSignificantBits}, permissions = ${permissionData.permissionMap}" }
+        DebugKit.ifDebug {
+            val logger = LPMiraiBootstrap.logger
+            logger.debug { "UUID $user with lnum ${user.leastSignificantBits}, permissions: " }
+            permissionData.permissionMap.forEach { (k, v) ->
+                logger.debug { "    $k -> $v" }
+            }
+            logger.debug { "Query options: " }
+            val opts = permissionData.queryOptions
+            logger.debug { "  `- mode: ${opts.mode()}, flags: ${opts.flags()}" }
+            logger.debug { "  `- options: ${opts.options()}" }
+            logger.debug { "  `- contexts:" }
+            opts.context().forEach { ctx ->
+                logger.debug { "    `- ${ctx.key} -> ${ctx.value}" }
+            }
+        }
         return testPermission(permission, permissionData, permission)
                 || DebugKit.isTrusted(permitteeId)
     }

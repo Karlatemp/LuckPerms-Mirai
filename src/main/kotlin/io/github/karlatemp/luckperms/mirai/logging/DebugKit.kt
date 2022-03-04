@@ -11,9 +11,10 @@
 
 package io.github.karlatemp.luckperms.mirai.logging
 
-import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
+import io.github.karlatemp.luckperms.mirai.LPMiraiBootstrap
 import net.mamoe.mirai.console.permission.AbstractPermitteeId
 import net.mamoe.mirai.console.permission.PermitteeId
+import net.mamoe.mirai.utils.debug
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -29,7 +30,15 @@ internal object DebugKit {
     inline fun log(msg: () -> String) {
         contract { callsInPlace(msg, InvocationKind.AT_MOST_ONCE) }
         if (isDebugEnabled) {
-            LPMiraiPlugin.logger.info("[DEBUG] ${msg()}")
+            LPMiraiBootstrap.logger.debug { "[DEBUG] ${msg()}" }
+        }
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    inline fun ifDebug(act: () -> Unit) {
+        contract { callsInPlace(act, InvocationKind.AT_MOST_ONCE) }
+        if (isDebugEnabled) {
+            act()
         }
     }
 

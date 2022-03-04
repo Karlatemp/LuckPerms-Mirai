@@ -11,6 +11,8 @@
 
 package io.github.karlatemp.luckperms.mirai.commands
 
+import io.github.karlatemp.luckperms.mirai.LPMiraiPlugin
+import io.github.karlatemp.luckperms.mirai.MAGIC_UUID_HIGH_BITS
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.LuckPermsPermission
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
@@ -21,12 +23,11 @@ import me.lucko.luckperms.common.command.abstraction.SingleCommand
 import me.lucko.luckperms.common.command.access.CommandPermission
 import me.lucko.luckperms.common.command.spec.CommandSpec
 import me.lucko.luckperms.common.command.utils.ArgumentList
+import me.lucko.luckperms.common.model.manager.user.UserHousekeeper
 import me.lucko.luckperms.common.plugin.LuckPermsPlugin
 import me.lucko.luckperms.common.sender.Sender
 import me.lucko.luckperms.common.util.Predicates
 import net.mamoe.mirai.console.permission.AbstractPermitteeId
-import net.mamoe.mirai.console.permission.PermissionId
-import net.mamoe.mirai.console.permission.PermitteeId
 
 internal object SwitchDebugCommand : SingleCommand(
     CommandSpec.LPM_DEBUG,
@@ -48,7 +49,19 @@ internal object SwitchDebugCommand : SingleCommand(
                 newLine("status - View LuckPermsMirai status")
                 newLine("logger - Enable/Disable debug logger.")
                 newLine("trust  - Temporarily trust full access to another user. (UNSAFE)")
+                newLine("check  - check [mirai user identity] [lp permission node] Check a permission via mirai permission api")
             })
+            "loadedUsr" -> {
+                sender.sendmsg(buildString {
+                    LPMiraiPlugin.userManager.all.forEach { (uid, usr) ->
+                        newLine {
+                            append(uid)
+                            append("  -> ")
+                            append(usr.plainDisplayName)
+                        }
+                    }
+                })
+            }
             "status" -> {
                 sender.sendmsg(buildString {
                     newLine("LuckPerms Mirai - Dev Kit")
@@ -67,6 +80,27 @@ internal object SwitchDebugCommand : SingleCommand(
                     newLine()
                     newLine("LPM DebugLogger: " + (if (DebugKit.isDebugEnabled) "ON" else "OFF"))
                     newLine("Trusted Users: " + DebugKit.trustedUsers)
+                    val keeper = LPMiraiPlugin.userManager.houseKeeper
+                    val ru = UserHousekeeper.Access.recentlyUsed(keeper)
+                    val rua = UserHousekeeper.Access.recentlyUsedApi(keeper)
+                    newLine("UserHousekeeper.recentlyUsed:")
+                    ru.snapshot().forEach { uid ->
+                        newLine {
+                            append(uid)
+                            if (uid.mostSignificantBits == MAGIC_UUID_HIGH_BITS) {
+                                append(" -> ").append(uid.leastSignificantBits)
+                            }
+                        }
+                    }
+                    newLine("UserHousekeeper.recentlyUsedApi:")
+                    rua.snapshot().forEach { uid ->
+                        newLine {
+                            append(uid)
+                            if (uid.mostSignificantBits == MAGIC_UUID_HIGH_BITS) {
+                                append(" -> ").append(uid.leastSignificantBits)
+                            }
+                        }
+                    }
                 })
             }
             "trust" -> {

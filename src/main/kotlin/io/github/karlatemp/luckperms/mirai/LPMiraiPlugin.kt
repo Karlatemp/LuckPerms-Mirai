@@ -25,6 +25,7 @@ import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService
 import io.github.karlatemp.luckperms.mirai.internal.LPPermissionService.uuid
 import io.github.karlatemp.luckperms.mirai.internal.Magic_NO_PERMISSION_CHECK
 import io.github.karlatemp.luckperms.mirai.internal.OpenApiImpl
+import io.github.karlatemp.luckperms.mirai.logging.DebugKit
 import me.lucko.luckperms.common.api.LuckPermsApiProvider
 import me.lucko.luckperms.common.calculator.CalculatorFactory
 import me.lucko.luckperms.common.command.CommandManager
@@ -49,6 +50,8 @@ import me.lucko.luckperms.common.tasks.CacheHousekeepingTask
 import me.lucko.luckperms.common.tasks.ExpireTemporaryTask
 import me.lucko.luckperms.common.util.MoreFiles
 import net.luckperms.api.LuckPerms
+import net.luckperms.api.event.user.UserLoadEvent
+import net.luckperms.api.event.user.UserUnloadEvent
 import net.luckperms.api.query.QueryOptions
 import net.mamoe.mirai.console.command.*
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
@@ -359,5 +362,11 @@ object LPMiraiPlugin : AbstractLuckPermsPlugin() {
     override fun performFinalSetup() {
         LPMiraiBootstrap.logger.info { "Registering internal users...." }
         connectionListener0.loadInternalUsers()
+        apiProvider.eventBus.subscribe(UserLoadEvent::class.java) { event ->
+            DebugKit.log { "[S] User Loaded:   ${event.user.friendlyName}(${event.user.uniqueId})" }
+        }
+        apiProvider.eventBus.subscribe(UserUnloadEvent::class.java) { event ->
+            DebugKit.log { "[S] User Unloaded: ${event.user.friendlyName}(${event.user.uniqueId})" }
+        }
     }
 }

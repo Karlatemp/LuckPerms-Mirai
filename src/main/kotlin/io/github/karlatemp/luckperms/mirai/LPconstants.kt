@@ -12,13 +12,13 @@
 package io.github.karlatemp.luckperms.mirai
 
 import me.lucko.luckperms.common.sender.Sender
+import me.lucko.luckperms.common.util.ExpiringSet
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 const val MAGIC_UUID_HIGH_BITS: Long =
     0x14768AEEFFA88746L
 
-val CACHED_USERS = ConcurrentHashMap<Long, Unit>()
 val UUID_CONSOLE = Sender.CONSOLE_UUID!!
 val UUID_ANY_MEMBER_SELECTOR = UUID(0, 1)
 val UUID_ANY_GROUP_SELECTOR = UUID(0, 2)

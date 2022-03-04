@@ -169,22 +169,21 @@ object LPMiraiBootstrap : KotlinPlugin(
     }
 
     override fun getPlayerCount(): Int {
-        return CACHED_USERS.size
+        return 0
     }
 
     override fun getPlayerList(): MutableCollection<String> {
-        return CACHED_USERS.keys().asSequence()
-            .map { it.toString() }
-            .toHashSet()
+        return mutableListOf()
     }
 
     override fun getOnlinePlayers(): MutableCollection<UUID> {
-        return CACHED_USERS.keys().asSequence()
-            .map { UUID(MAGIC_UUID_HIGH_BITS, it) }
-            .toHashSet()
+        return mutableListOf()
     }
 
     override fun isPlayerOnline(uniqueId: UUID): Boolean {
+        if (uniqueId.mostSignificantBits == 0L) { // System
+            return true
+        }
         return uniqueId.mostSignificantBits == MAGIC_UUID_HIGH_BITS
     }
 

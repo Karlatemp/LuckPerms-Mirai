@@ -248,6 +248,34 @@ index 0be4e97e1..bf66ed15d 100644
              prefixed(text()
                      .color(AQUA)
                      .append(text("-  ", WHITE))
+diff --git a/common/src/main/java/me/lucko/luckperms/common/model/manager/user/UserHousekeeper.java b/common/src/main/java/me/lucko/luckperms/common/model/manager/user/UserHousekeeper.java
+index f1ae13665..bbbd40edc 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/model/manager/user/UserHousekeeper.java
++++ b/common/src/main/java/me/lucko/luckperms/common/model/manager/user/UserHousekeeper.java
+@@ -75,7 +75,7 @@ public class UserHousekeeper implements Runnable {
+ 
+     public void cleanup(UUID uuid) {
+         // unload users which aren't online and who haven't been online (or tried to login) recently
+-        if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || this.plugin.getBootstrap().isPlayerOnline(uuid)) {
++        if (this.recentlyUsed.contains(uuid) || this.recentlyUsedApi.contains(uuid) || uuid.getMostSignificantBits() == 0L) {
+             return;
+         }
+ 
+@@ -108,4 +108,14 @@ public class UserHousekeeper implements Runnable {
+             this.unit = unit;
+         }
+     }
++
++    public static class Access {
++        public static ExpiringSet<UUID> recentlyUsed(UserHousekeeper i) {
++            return i.recentlyUsed;
++        }
++
++        public static ExpiringSet<UUID> recentlyUsedApi(UserHousekeeper i) {
++            return i.recentlyUsedApi;
++        }
++    }
+ }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java b/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
 index 2680ab00e..c904d6fbd 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/plugin/bootstrap/LuckPermsBootstrap.java
@@ -284,6 +312,38 @@ index a4287a7d0..df176f333 100644
 +
 +    default boolean isHoverEventSupported() { return false; }
  }
+diff --git a/common/src/main/java/me/lucko/luckperms/common/util/ExpiringSet.java b/common/src/main/java/me/lucko/luckperms/common/util/ExpiringSet.java
+index 8ed2535d9..aef840178 100644
+--- a/common/src/main/java/me/lucko/luckperms/common/util/ExpiringSet.java
++++ b/common/src/main/java/me/lucko/luckperms/common/util/ExpiringSet.java
+@@ -27,6 +27,9 @@ package me.lucko.luckperms.common.util;
+ 
+ import com.github.benmanes.caffeine.cache.Cache;
+ 
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.Map;
+ import java.util.concurrent.TimeUnit;
+ 
+ /**
+@@ -57,4 +60,17 @@ public class ExpiringSet<E> {
+     public void remove(E item) {
+         this.cache.invalidate(item);
+     }
++
++    public Collection<E> snapshot() {
++        ArrayList<E> rsp = new ArrayList<>();
++        long currentTime = System.currentTimeMillis();
++        for (Map.Entry<E, Long> e : cache.asMap().entrySet()) {
++            E k = e.getKey();
++            Long v = e.getValue();
++            if (v != null && v > currentTime) {
++                rsp.add(k);
++            }
++        }
++        return rsp;
++    }
+ }
 diff --git a/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java b/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
 index 22c082368..063585fce 100644
 --- a/common/src/main/java/me/lucko/luckperms/common/verbose/VerboseListener.java
@@ -298,7 +358,7 @@ index 22c082368..063585fce 100644
              return;
          }
 diff --git a/settings.gradle b/settings.gradle
-index db3bdea62..b88ed5914 100644
+index 17a0c9c99..b88ed5914 100644
 --- a/settings.gradle
 +++ b/settings.gradle
 @@ -1,7 +1,6 @@
@@ -309,7 +369,7 @@ index db3bdea62..b88ed5914 100644
          maven {
              url 'https://maven.fabricmc.net/'
          }
-@@ -14,15 +13,4 @@ include (
+@@ -14,18 +13,4 @@ include (
          'api',
          'common',
          'common:loader-utils',
@@ -322,6 +382,9 @@ index db3bdea62..b88ed5914 100644
 -        'fabric',
 -        'nukkit',
 -        'nukkit:loader',
--        'sponge', 'sponge:sponge-service', 'sponge:sponge-service-api8',
+-        'sponge',
+-        'sponge:loader',
+-        'sponge:sponge-service',
+-        'sponge:sponge-service-api8',
 -        'velocity'
  )

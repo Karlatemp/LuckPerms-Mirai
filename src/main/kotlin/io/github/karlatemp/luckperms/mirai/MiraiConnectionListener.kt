@@ -32,13 +32,16 @@ class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
 
     fun recUsr(id: Long) {
         val uid = UUID(MAGIC_UUID_HIGH_BITS, id)
-        DebugKit.log { "Checking user object for $id..." }
         val loaded = LPMiraiPlugin.apiProvider.userManager.getUser(uid)
         if (loaded == null) {
-            DebugKit.log { "User object of $id not create. Creating..." }
+            DebugKit.log { "Registered $id with $uid" }
             loadUser(uid, id.toString())
             recordConnection(uid)
         }
+    }
+
+    override fun recordConnection(uniqueId: UUID?) {
+        // noop
     }
 
     internal fun loadInternalUsers() {
@@ -58,16 +61,5 @@ class MiraiConnectionListener : AbstractConnectionListener(LPMiraiPlugin) {
     }
 
     fun registerListeners() {
-        LPMiraiBootstrap.globalEventChannel().subscribeAlways<MessageEvent>(
-            priority = EventPriority.HIGHEST
-        ) {
-            loadInternalUsers()
-            recUsr(sender.id)
-            message.forEach { elm ->
-                if (elm is At) {
-                    recUsr(elm.target)
-                }
-            }
-        }
     }
 }
