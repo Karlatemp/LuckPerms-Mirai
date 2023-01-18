@@ -11,12 +11,13 @@
 
 package io.github.karlatemp.luckperms.mirai
 
+import me.lucko.luckperms.common.plugin.bootstrap.LuckPermsBootstrap
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-object MiraiSchedulerAdapter : AbstractJavaScheduler() {
+internal class MiraiSchedulerAdapter(bootstrap: LuckPermsBootstrap?) : AbstractJavaScheduler(bootstrap) {
     private val service = Executors.newSingleThreadExecutor {
         Thread(it, "Mirai LuckPerms Sync")
     }

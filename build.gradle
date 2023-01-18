@@ -14,8 +14,8 @@ import java.nio.file.Files
 plugins {
     id 'java'
     id 'java-library'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.30'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 def lpVersion = ({
@@ -47,7 +47,7 @@ println("GitVersion = $gitVersion")
 println("LpGVersion = $gitLpVersion")
 
 // [LP-Mirai version]-[LuckPerms version]
-def lpMiraiVer = '2.10.0-dev-6'
+def lpMiraiVer = '2.14.0-dev-7'
 def ver = lpMiraiVer + '+' + lpVersion
 
 allprojects {

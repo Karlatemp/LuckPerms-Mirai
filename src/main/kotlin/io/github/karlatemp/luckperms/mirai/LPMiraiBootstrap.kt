@@ -27,7 +27,9 @@ import me.lucko.luckperms.common.plugin.scheduler.SchedulerAdapter
 import net.luckperms.api.platform.Platform
 import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.extension.PluginComponentStorage
+import net.mamoe.mirai.console.extensions.PermissionServiceProvider
 import net.mamoe.mirai.console.permission.AbstractPermitteeId
+import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import ninja.leaping.configurate.ConfigurationNode
@@ -80,10 +82,11 @@ object LPMiraiBootstrap : KotlinPlugin(
 ), LuckPermsBootstrap {
 
     private val pluginLogger0 by lazy { MiraiPluginLogger(logger) }
+    private val schedulerAdapter by lazy { MiraiSchedulerAdapter(this) }
 
     override fun getPluginLogger(): PluginLogger = pluginLogger0
 
-    override fun getScheduler(): SchedulerAdapter = MiraiSchedulerAdapter
+    override fun getScheduler(): SchedulerAdapter = schedulerAdapter
 
     override fun getClassPathAppender(): ClassPathAppender = classPathAppender
     private val classPathAppender = RCP(this)
@@ -196,7 +199,12 @@ object LPMiraiBootstrap : KotlinPlugin(
             incompatibleVersion = true
             return
         }
-        this.contributePermissionService { LPPermissionService }
+        this.contributePermissionService {
+            object : PermissionServiceProvider {
+                override val instance: PermissionService<*>
+                    get() = LPPermissionService
+            }
+        }
         try {
             LPMiraiPlugin.load()
         } finally {

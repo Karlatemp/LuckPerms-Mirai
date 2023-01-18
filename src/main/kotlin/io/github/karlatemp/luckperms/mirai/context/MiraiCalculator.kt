@@ -141,6 +141,8 @@ object MiraiCalculator : ContextCalculator<PermitteeId> {
                         consumer.accept("type", "console")
                         consumer.accept(contact, "console")
                     }
+
+                    else -> {}
                 }
             }
         }
